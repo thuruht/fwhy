@@ -434,10 +434,22 @@ document.addEventListener('DOMContentLoaded', () => {
           body: JSON.stringify(data),
         });
 
-        // Open the Mailchimp URL in a new tab or popup
+        // Subscribe to Kit newsletter
         const email = encodeURIComponent(data.email);
-        const mailchimpUrl = `https://mailchi.mp/eae4ec3932c9/farewell-email-signup-page?mc-EMAIL=${email}`;
-        window.open(mailchimpUrl, '_blank', 'noopener,noreferrer');
+        try {
+          await fetch('https://app.kit.com/forms/8151329/subscriptions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email_address: data.email
+            })
+          });
+          console.log('Successfully subscribed to newsletter');
+        } catch (error) {
+          console.error('Newsletter subscription failed:', error);
+        }
 
         // Reset the form
         e.target.reset();
