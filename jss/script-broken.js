@@ -2,7 +2,29 @@ document.addEventListener('DOMContentLoaded', () => {
   // --------------------------
   // DOM Elements
   // --------------------------
-  const howdySpan = document.querySelector('.header-title .sulk'); 
+  const howdySpan = document.quer      // Transform data to match expected flyer format
+      // Legacy endpoint returns array directly, unified would have .events property
+      const transformedData = Array.isArray(data) ? data.map(event => ({
+        id: event.id,
+        title: event.title,
+        imageUrl: event.flyerThumbnail || event.flyerUrl || event.imageUrl,
+        date: event.date || event.eventDate,
+        time: event.time || event.eventTime,
+        venue: event.venue || event.type || state, // legacy uses 'type' field
+        description: event.description,
+        suggestedPrice: event.suggestedPrice,
+        ticketLink: event.ticketLink
+      })) : (data.events || []).map(event => ({
+        id: event.id,
+        title: event.title,
+        imageUrl: event.flyerThumbnail || event.flyerUrl || event.imageUrl,
+        date: event.date || event.eventDate,
+        time: event.time || event.eventTime,
+        venue: event.venue || event.type || state,
+        description: event.description,
+        suggestedPrice: event.suggestedPrice,
+        ticketLink: event.ticketLink
+      }));header-title .sulk'); 
   const farewellSpan = document.querySelector('.header-title .span2'); 
   const body = document.querySelector('body');
   const title = document.querySelector('title');
@@ -168,28 +190,17 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       // Transform data to match expected flyer format
-      // Legacy endpoint returns array directly, unified would have .events property
-      const transformedData = Array.isArray(data) ? data.map(event => ({
+      const transformedData = data.events ? data.events.map(event => ({
         id: event.id,
         title: event.title,
         imageUrl: event.flyerThumbnail || event.flyerUrl || event.imageUrl,
         date: event.date || event.eventDate,
         time: event.time || event.eventTime,
-        venue: event.venue || event.type || state, // legacy uses 'type' field
+        venue: event.venue || state,
         description: event.description,
         suggestedPrice: event.suggestedPrice,
         ticketLink: event.ticketLink
-      })) : (data.events || []).map(event => ({
-        id: event.id,
-        title: event.title,
-        imageUrl: event.flyerThumbnail || event.flyerUrl || event.imageUrl,
-        date: event.date || event.eventDate,
-        time: event.time || event.eventTime,
-        venue: event.venue || event.type || state,
-        description: event.description,
-        suggestedPrice: event.suggestedPrice,
-        ticketLink: event.ticketLink
-      }));
+      })) : (Array.isArray(data) ? data : []);
 
       // Store in cache
       cache.set(cacheKey, { data: transformedData, timestamp: now });
@@ -513,16 +524,20 @@ document.addEventListener('DOMContentLoaded', () => {
   async function displayEventsPopup(venue) {
     console.log('displayEventsPopup called with venue:', venue);
     try {
-      // Use legacy endpoint directly since unified doesn't exist yet
+      // Fetch events from unified endpoint - try the list endpoint first as fallback
+      let upcomingResponse;
+      let upcomingData;
+      
+      // Skip unified endpoint for now since it doesn't exist, go straight to legacy
       console.log('Using legacy list endpoint...');
-      const upcomingResponse = await fetch(`${BASE_URL}/list/${venue}`);
+      upcomingResponse = await fetch(`${BASE_URL}/list/${venue}`);
       if (!upcomingResponse.ok) {
         throw new Error(`Legacy endpoint failed: ${upcomingResponse.status} ${upcomingResponse.statusText}`);
       }
-      const upcomingData = await upcomingResponse.json();
+      upcomingData = await upcomingResponse.json();
       console.log('Legacy endpoint success, events count:', upcomingData.length);
       
-      // Legacy endpoint returns array directly
+      // Legacy endpoint returns array directly, not wrapped in { events: [] }
       const upcomingEvents = Array.isArray(upcomingData) ? upcomingData : [];
       console.log('Final events array:', upcomingEvents.length, 'events');
 
