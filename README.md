@@ -1,14 +1,47 @@
-# Farewell Cafe - Cloudflare Worker
+# Farewell & Howdy Website
 
-This repository contains the Farewell Cafe website migrated from Cloudflare Pages to Cloudflare Workers.
+A dynamic dual-venue website for Farewell and Howdy venues in Kansas City, Missouri. Built as a Cloudflare Worker with static asset serving and unified events management.
 
-## Features
+## Recent Major Updates (June 2025)
 
-- ✅ Serves all static assets (HTML, CSS, JS, images, fonts)
-- ✅ Custom 404 error page that matches the site design
-- ✅ Handles .htm file extensions
-- ✅ Proper MIME type handling for all assets
-- ✅ Optimized caching and performance
+### ✅ Completed Migration & Integration
+- **Cloudflare Worker Migration**: Successfully migrated from Cloudflare Pages to Worker with static asset serving
+- **Newsletter System**: Replaced MailChimp with Kit (ConvertKit) integration
+- **Simplified Batch Upload**: Removed AI/OCR features, implemented manual event entry system
+- **Unified Events System**: Integrated flyer thumbnails, suggested pricing, and ticket links with deduplication
+
+### Key Features
+
+#### 1. Dual-Venue Experience
+- Toggle between Farewell and Howdy venues with dynamic content switching
+- Venue-specific images, social links, calendars, and event listings
+- State-aware routing and content display
+
+#### 2. Event Management System
+- **Unified Events API**: Central endpoint for event aggregation and deduplication
+- **Flyer Integration**: Thumbnail support with original flyer display
+- **Enhanced Event Data**: Suggested pricing, ticket links, venue info, and descriptions
+- **Smart Deduplication**: Merges duplicate events from multiple sources
+- **Venue Filtering**: Separate listings for Farewell and Howdy shows
+
+#### 3. Simplified Batch Upload
+- **Manual Entry System**: Clean interface without AI/OCR complexity  
+- **Multiple File Upload**: Batch process multiple flyers with individual event details
+- **Required Fields**: Title, date, and venue with optional pricing and ticket links
+- **Real-time Validation**: Form validation and success/error feedback
+- **Integrated Storage**: Direct integration with unified events database
+
+#### 4. Newsletter Integration
+- **Kit (ConvertKit) Form**: Custom-styled form matching site design
+- **Form ID**: `8151329` (configured for production)
+- **Success/Error Handling**: User-friendly response messages
+- **State-aware Signup**: Context-aware newsletter subscription
+
+#### 5. Popup System & Navigation
+- **Event Listings Popup**: Dynamic popup showing upcoming shows with thumbnails
+- **Calendar Integration**: .ics file download and Google Calendar integration
+- **Social Media Links**: Venue-specific social media integration
+- **Mobile Responsive**: Optimized for all device sizes
 
 ## Local Development
 

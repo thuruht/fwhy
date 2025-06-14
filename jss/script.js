@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
-   * Fetch upcoming or past flyers from the Worker.
+   * Fetch upcoming or past flyers from the unified events Worker.
    * @param {string} state - 'howdy' or 'farewell'
    * @param {boolean} showPast - whether to fetch archives or upcoming
    */
@@ -146,9 +146,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
+      // Use unified events endpoint with venue filtering
       const url = showPast
-        ? `${BASE_URL}/archives?type=${state}`
-        : `${BASE_URL}/list/${state}`;
+        ? `${BASE_URL}/events/venue?venue=${state}&past=true`
+        : `${BASE_URL}/events/venue?venue=${state}`;
 
       const response = await fetch(url);
       if (!response.ok) {
@@ -156,9 +157,23 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const data = await response.json();
+      
+      // Transform data to match expected flyer format
+      const transformedData = data.events ? data.events.map(event => ({
+        id: event.id,
+        title: event.title,
+        imageUrl: event.flyerThumbnail || event.flyerUrl,
+        date: event.date,
+        time: event.time,
+        venue: event.venue,
+        description: event.description,
+        suggestedPrice: event.suggestedPrice,
+        ticketLink: event.ticketLink
+      })) : [];
+
       // Store in cache
-      cache.set(cacheKey, { data, timestamp: now });
-      return data;
+      cache.set(cacheKey, { data: transformedData, timestamp: now });
+      return transformedData;
     } catch (error) {
       console.error('Error fetching flyers:', error);
       return [];
@@ -466,6 +481,148 @@ document.addEventListener('DOMContentLoaded', () => {
       initSlideshow(); 
     });
   }
+
+  // --------------------------
+  // Events Listing Popup Functions
+  // --------------------------
+
+  /**
+   * Generate and display events listing popup content
+   * @param {string} venue - 'howdy' or 'farewell'
+   */
+  async function displayEventsPopup(venue) {
+    try {
+      // Fetch events from unified endpoint
+      const upcomingResponse = await fetch(`${BASE_URL}/events/venue?venue=${venue}`);
+      const upcomingData = await upcomingResponse.json();
+      const upcomingEvents = upcomingData.events || [];
+
+      // Create popup content
+      let popupContent = `
+        <div style="padding: 20px; font-family: var(--font-hnm11); background: var(--card-bg-color);">
+          <h2 style="text-align: center; margin-bottom: 20px; color: var(--text-color);">
+            ${venue.toUpperCase()} UPCOMING SHOWS
+          </h2>
+      `;
+
+      if (upcomingEvents.length === 0) {
+        popupContent += `
+          <p style="text-align: center; color: var(--text-color); font-style: italic;">
+            No upcoming shows found.
+          </p>
+        `;
+      } else {
+        upcomingEvents.forEach(event => {
+          const eventDate = new Date(event.date);
+          const formattedDate = eventDate.toLocaleDateString('en-US', {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          });
+
+          popupContent += `
+            <div style="border: 1px solid var(--nav-border-color); margin: 10px 0; padding: 15px; background: rgba(255,255,255,0.9);">
+              <div style="display: flex; gap: 15px; align-items: flex-start;">
+                ${event.flyerThumbnail ? `
+                  <img src="${event.flyerThumbnail}" alt="${event.title}" 
+                       style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px; flex-shrink: 0;">
+                ` : ''}
+                <div style="flex: 1;">
+                  <h3 style="margin: 0 0 8px 0; color: var(--text-color); font-size: 1.1em;">
+                    ${event.title}
+                  </h3>
+                  <p style="margin: 4px 0; color: var(--text-color); font-weight: bold;">
+                    📅 ${formattedDate}
+                    ${event.time ? ` at ${event.time}` : ''}
+                  </p>
+                  <p style="margin: 4px 0; color: var(--text-color);">
+                    📍 ${event.venue.toUpperCase()}
+                  </p>
+                  ${event.suggestedPrice ? `
+                    <p style="margin: 4px 0; color: var(--text-color);">
+                      💰 ${event.suggestedPrice}
+                    </p>
+                  ` : ''}
+                  ${event.description ? `
+                    <p style="margin: 8px 0 4px 0; color: var(--text-color); font-size: 0.9em; line-height: 1.4;">
+                      ${event.description.substring(0, 200)}${event.description.length > 200 ? '...' : ''}
+                    </p>
+                  ` : ''}
+                  ${event.ticketLink ? `
+                    <a href="${event.ticketLink}" target="_blank" rel="noopener" 
+                       style="display: inline-block; margin-top: 8px; padding: 6px 12px; 
+                              background: var(--button-bg-color); color: var(--button-text-color); 
+                              text-decoration: none; border-radius: 4px; font-size: 0.9em;">
+                      🎫 Get Tickets
+                    </a>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      popupContent += `
+          <div style="text-align: center; margin-top: 20px;">
+            <small style="color: var(--text-color); opacity: 0.7;">
+              Switch between HOWDY and FAREWELL modes to see different venue listings
+            </small>
+          </div>
+        </div>
+      `;
+
+      return popupContent;
+    } catch (error) {
+      console.error('Error fetching events for popup:', error);
+      return `
+        <div style="padding: 20px; text-align: center;">
+          <p style="color: #ea4110;">Error loading events. Please try again later.</p>
+        </div>
+      `;
+    }
+  }
+
+  // --------------------------
+  // Popup System Integration
+  // --------------------------
+
+  // Listen for popup requests on show listings links
+  document.addEventListener('click', async function(event) {
+    const link = event.target.closest('a.cal-link-listing');
+    
+    if (link && (link.classList.contains('open-popup') || link.getAttribute('href') === '#shows')) {
+      event.preventDefault();
+      
+      // Determine venue from current state
+      const currentState = body?.dataset.state || 'farewell';
+      
+      // Generate popup content
+      const popupContent = await displayEventsPopup(currentState);
+      
+      // Create and show popup window
+      const popupWindow = window.open('', 'eventsPopup', 
+        'width=800,height=600,scrollbars=yes,resizable=yes');
+      
+      if (popupWindow) {
+        popupWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>${currentState.toUpperCase()} Shows - Farewell & Howdy</title>
+            <link rel="stylesheet" href="${window.location.origin}/css/ccssss.css">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="margin: 0; padding: 0;">
+            ${popupContent}
+          </body>
+          </html>
+        `);
+        popupWindow.document.close();
+      }
+    }
+  });
 
   // --------------------------
   // Initial Setup
