@@ -512,10 +512,12 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   async function displayEventsPopup(venue) {
     console.log('displayEventsPopup called with venue:', venue);
+    console.log('BASE_URL:', BASE_URL);
     try {
       // Use legacy endpoint directly since unified doesn't exist yet
-      console.log('Using legacy list endpoint...');
-      const upcomingResponse = await fetch(`${BASE_URL}/list/${venue}`);
+      const endpoint = `${BASE_URL}/list/${venue}`;
+      console.log('Calling endpoint:', endpoint);
+      const upcomingResponse = await fetch(endpoint);
       if (!upcomingResponse.ok) {
         throw new Error(`Legacy endpoint failed: ${upcomingResponse.status} ${upcomingResponse.statusText}`);
       }
