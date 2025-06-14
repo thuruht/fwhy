@@ -1,0 +1,43 @@
+name = "fwhy-dev-front"
+main = "src/index.js"
+compatibility_date = "2025-04-08"
+
+[site]
+bucket = "./"
+
+[env.production]
+name = "fwhy-dev-front"
+route = { pattern = "dev.farewellcafe.com/*", zone_name = "farewellcafe.com" }
+
+[env.dev]
+name = "fwhy-dev-front-dev"
+
+# Define any environment variables you might need
+# [vars]
+# ENVIRONMENT = "production"
+
+# If you need any secrets, define them here (set with wrangler secret put)
+# [secrets]
+# SECRET_KEY = "your-secret-key"
+
+# KV namespaces (if needed in the future)
+# [[kv_namespaces]]
+# binding = "MY_KV_NAMESPACE"
+# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+# preview_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# D1 databases (if needed in the future)
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "my-database"
+# database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# R2 buckets (if needed in the future)  
+# [[r2_buckets]]
+# binding = "MY_BUCKET"
+# bucket_name = "my-bucket"
+
+# Analytics Engine (if needed)
+# [[analytics_engine_datasets]]
+# binding = "AE"
+# dataset = "my_dataset"

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>404 - Page Not Found | FAREWELL CAFE</title>
+    <link rel="icon" type="image/x-icon" href="./img/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./css/ccssss.css">
+    
+    <style>
+        .not-found-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 70vh;
+            text-align: center;
+            padding: var(--padding-large);
+        }
+        
+        .not-found-title {
+            font-family: var(--font-main);
+            font-size: 4rem;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px var(--header-text-shadow);
+        }
+        
+        .not-found-message {
+            font-family: var(--font-secondary);
+            font-size: 1.2rem;
+            color: var(--text-color);
+            margin-bottom: 2rem;
+            max-width: 600px;
+        }
+        
+        .home-link {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: var(--button-bg-color);
+            color: var(--button-text-color);
+            text-decoration: none;
+            font-family: var(--font-main);
+            font-weight: bold;
+            border-radius: 4px;
+            transition: all var(--transition-speed) ease;
+            border: 2px solid var(--text-color);
+        }
+        
+        .home-link:hover {
+            background: var(--accent-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        body[data-state="farewell"] {
+            background: var(--header-bg);
+        }
+        
+        .error-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .lost-soul {
+            font-size: 0.9rem;
+            font-style: italic;
+            color: var(--text-color);
+            opacity: 0.8;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+
+<body data-state="farewell">
+    <header class="feader" style="min-height:212px;">
+        <div class="contain">
+            <div class="left">
+                <nav>
+                    <ul>
+                        <li><a href="./booking.htm">BOOKING</a></li>
+                        <li><a href="./more.htm">MORE</a></li>
+                        <li><a href="./about.htm">ABOUT</a></li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="right">
+                <h1 class="header-title">
+                    <span class="span2">FAREWELL</span>
+                    <span class="sulk drop-wiggle"> & HOWDY</span>
+                </h1>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="not-found-container">
+            <div class="error-animation">
+                <h1 class="not-found-title">404</h1>
+            </div>
+            <p class="not-found-message">
+                Oops! The page you're looking for seems to have wandered off like a lost soul at a farewell party.
+            </p>
+            <a href="/" class="home-link">TAKE ME HOME</a>
+            <p class="lost-soul">
+                Perhaps it's time to say farewell to this URL and howdy to our homepage?
+            </p>
+        </div>
+    </main>
+
+    <!-- Include the same JS as main site for consistency -->
+    <script src="./jss/gsap-public/minified/gsap.min.js"></script>
+    <script>
+        // Simple animation for the 404 page
+        if (typeof gsap !== 'undefined') {
+            gsap.from('.not-found-container', {
+                duration: 1,
+                y: 50,
+                opacity: 0,
+                ease: 'back.out(1.7)'
+            });
+        }
+    </script>
+</body>
+</html>
