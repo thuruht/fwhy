@@ -1,0 +1,42 @@
+name = "farewell-howdy-admin"
+main = "src/index.js"
+compatibility_date = "2025-05-20"
+compatibility_flags = ["nodejs_compat"]
+
+[env.production]
+name = "farewell-howdy-admin-prod"
+routes = ["admin.farewellcafe.com/*"]
+
+[[kv_namespaces]]
+binding = "EVENTS"
+id = "your_events_kv_namespace_id"
+preview_id = "your_events_preview_kv_namespace_id"
+
+[[kv_namespaces]]
+binding = "GALLERY"
+id = "your_gallery_kv_namespace_id"
+preview_id = "your_gallery_preview_kv_namespace_id"
+
+[[kv_namespaces]]
+binding = "BLOG"
+id = "your_blog_kv_namespace_id"
+preview_id = "your_blog_preview_kv_namespace_id"
+
+[[kv_namespaces]]
+binding = "MENU"
+id = "your_menu_kv_namespace_id"
+preview_id = "your_menu_preview_kv_namespace_id"
+
+[[kv_namespaces]]
+binding = "SETTINGS"
+id = "your_settings_kv_namespace_id"
+preview_id = "your_settings_preview_kv_namespace_id"
+
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "farewell-howdy-images"
+preview_bucket_name = "farewell-howdy-images-preview"
+
+[vars]
+CORS_ORIGINS = "https://farewellcafe.com,https://dev.farewellcafe.com,https://howdybar.com"
+API_VERSION = "v1"

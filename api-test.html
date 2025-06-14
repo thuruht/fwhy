@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Integration Test - Farewell/Howdy</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-section {
+            border: 1px solid #ddd;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .test-section h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .api-response {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .event-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .event-card {
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 6px;
+            background: white;
+        }
+        .event-thumbnail {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .placeholder-thumbnail {
+            width: 100%;
+            height: 150px;
+            background: #eee;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+        }
+        .error {
+            color: #d63384;
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #f5c2c7;
+        }
+        .success {
+            color: #0f5132;
+            background: #d1e7dd;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #badbcc;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005a87;
+        }
+    </style>
+</head>
+<body>
+    <h1>Farewell/Howdy API Integration Test</h1>
+    <p>This page tests the integration between the frontend and the new unified admin backend.</p>
+
+    <!-- Test 1: Events List API -->
+    <div class="test-section">
+        <h2>Test 1: Events List API</h2>
+        <p>Testing the new <code>/api/events/list</code> endpoint with thumbnails.</p>
+        <div>
+            <button onclick="testEventsAPI('all')">Test All Venues</button>
+            <button onclick="testEventsAPI('farewell')">Test Farewell</button>
+            <button onclick="testEventsAPI('howdy')">Test Howdy</button>
+        </div>
+        <div id="events-result" class="api-response"></div>
+        <div id="events-display" class="event-grid"></div>
+    </div>
+
+    <!-- Test 2: Slideshow API -->
+    <div class="test-section">
+        <h2>Test 2: Slideshow API</h2>
+        <p>Testing the new <code>/api/events/slideshow</code> endpoint for venue-specific slideshows.</p>
+        <div>
+            <button onclick="testSlideshowAPI('farewell')">Test Farewell Slideshow</button>
+            <button onclick="testSlideshowAPI('howdy')">Test Howdy Slideshow</button>
+        </div>
+        <div id="slideshow-result" class="api-response"></div>
+        <div id="slideshow-display" class="event-grid"></div>
+    </div>
+
+    <!-- Test 3: Legacy Compatibility -->
+    <div class="test-section">
+        <h2>Test 3: Legacy API Compatibility</h2>
+        <p>Testing fallback to legacy endpoints when unified API is not available.</p>
+        <div>
+            <button onclick="testLegacyAPI('farewell')">Test Legacy Farewell</button>
+            <button onclick="testLegacyAPI('howdy')">Test Legacy Howdy</button>
+        </div>
+        <div id="legacy-result" class="api-response"></div>
+    </div>
+
+    <!-- Test 4: Popup Integration -->
+    <div class="test-section">
+        <h2>Test 4: Enhanced Popup</h2>
+        <p>Testing the enhanced popup with thumbnails and new fields.</p>
+        <div>
+            <button onclick="testPopup('farewell')">Test Farewell Popup</button>
+            <button onclick="testPopup('howdy')">Test Howdy Popup</button>
+        </div>
+        <div id="popup-result"></div>
+    </div>
+
+    <script>
+        // Configuration - matches the updated script.js
+        const getCurrentDomain = () => window.location.hostname;
+        const getApiBaseUrl = () => {
+            const domain = getCurrentDomain();
+            // Use the new unified admin backend for API calls
+            if (domain === 'dev.farewellcafe.com') {
+                return 'https://fwhyadmin-dev.your-subdomain.workers.dev';
+            } else if (domain === 'farewellcafe.com') {
+                return 'https://admin.farewellcafe.com';
+            }
+            // For local development, use localhost admin backend
+            return 'http://localhost:8787';
+        };
+
+        const BASE_URL = getApiBaseUrl();
+
+        // Test Functions
+        async function testEventsAPI(venue) {
+            const resultDiv = document.getElementById('events-result');
+            const displayDiv = document.getElementById('events-display');
+            
+            resultDiv.textContent = 'Loading...';
+            displayDiv.innerHTML = '';
+
+            try {
+                const url = `${BASE_URL}/api/events/list?venue=${venue}&thumbnails=true&limit=10`;
+                console.log('Testing URL:', url);
+                
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="success">✅ Success! Found ${data.events?.length || 0} events</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>`;
+                    
+                    // Display events visually
+                    if (data.events && data.events.length > 0) {
+                        displayDiv.innerHTML = data.events.map(event => `
+                            <div class="event-card">
+                                ${event.thumbnail_url ? 
+                                    `<img src="${event.thumbnail_url}" alt="${event.title}" class="event-thumbnail">` :
+                                    `<div class="placeholder-thumbnail">No Image</div>`
+                                }
+                                <h4>${event.title}</h4>
+                                <p><strong>Date:</strong> ${event.date_formatted || event.date}</p>
+                                <p><strong>Venue:</strong> ${event.venue_display || event.venue}</p>
+                                <p><strong>Time:</strong> ${event.default_time || 'TBD'}</p>
+                                ${event.age_restriction ? `<p><strong>Age:</strong> ${event.age_restriction}</p>` : ''}
+                                ${event.suggested_price ? `<p><strong>Price:</strong> ${event.suggested_price}</p>` : ''}
+                            </div>
+                        `).join('');
+                    }
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Error: ${response.status} ${response.statusText}</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Network Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testSlideshowAPI(venue) {
+            const resultDiv = document.getElementById('slideshow-result');
+            const displayDiv = document.getElementById('slideshow-display');
+            
+            resultDiv.textContent = 'Loading...';
+            displayDiv.innerHTML = '';
+
+            try {
+                const url = `${BASE_URL}/api/events/slideshow?venue=${venue}`;
+                console.log('Testing URL:', url);
+                
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="success">✅ Success! Found ${data.slideshow?.length || 0} slideshow items</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>`;
+                    
+                    // Display slideshow items
+                    if (data.slideshow && data.slideshow.length > 0) {
+                        displayDiv.innerHTML = data.slideshow.map(slide => `
+                            <div class="event-card">
+                                ${slide.thumbnail_url || slide.image_url ? 
+                                    `<img src="${slide.thumbnail_url || slide.image_url}" alt="${slide.title}" class="event-thumbnail">` :
+                                    `<div class="placeholder-thumbnail">No Image</div>`
+                                }
+                                <h4>${slide.title}</h4>
+                                <p><strong>Date:</strong> ${slide.date}</p>
+                                <p><strong>Venue:</strong> ${slide.venue}</p>
+                                <p><strong>Order:</strong> ${slide.order || 0}</p>
+                            </div>
+                        `).join('');
+                    }
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Error: ${response.status} ${response.statusText}</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Network Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testLegacyAPI(venue) {
+            const resultDiv = document.getElementById('legacy-result');
+            
+            resultDiv.textContent = 'Loading...';
+
+            try {
+                // Test the old endpoint that should still work as fallback
+                const url = `${BASE_URL}/list/${venue}`;
+                console.log('Testing legacy URL:', url);
+                
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="success">✅ Legacy API works! Found ${data.length || 0} events</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Error: ${response.status} ${response.statusText}</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Network Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testPopup(venue) {
+            const resultDiv = document.getElementById('popup-result');
+            
+            resultDiv.innerHTML = '<p>Opening popup window with enhanced event listing...</p>';
+
+            try {
+                // Use the same logic as the updated script.js
+                const url = `${BASE_URL}/api/events/list?venue=${venue}&thumbnails=true&limit=50`;
+                
+                const response = await fetch(url);
+                let events = [];
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    events = data.events || [];
+                } else {
+                    // Fallback to legacy
+                    const legacyResponse = await fetch(`${BASE_URL}/list/${venue}`);
+                    if (legacyResponse.ok) {
+                        const legacyData = await legacyResponse.json();
+                        events = Array.isArray(legacyData) ? legacyData : [];
+                    }
+                }
+
+                // Create popup with enhanced styling
+                const popupContent = `
+                    <div style="padding: 20px; font-family: Arial, sans-serif;">
+                        <h2 style="text-align: center; margin-bottom: 30px; color: #333; border-bottom: 2px solid #ddd; padding-bottom: 10px;">
+                            ${venue.toUpperCase()} UPCOMING SHOWS
+                        </h2>
+                        ${events.length === 0 ? 
+                            '<p style="text-align: center; color: #666; font-style: italic;">No upcoming shows found.</p>' :
+                            events.map(event => `
+                                <div style="border: 1px solid #ddd; margin: 15px 0; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                    <div style="display: flex; gap: 20px; align-items: flex-start;">
+                                        ${(event.thumbnail_url || event.flyerThumbnail || event.imageUrl) ? 
+                                            `<img src="${event.thumbnail_url || event.flyerThumbnail || event.imageUrl}" alt="${event.title}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 6px; border: 2px solid #ddd;">` :
+                                            `<div style="width: 100px; height: 100px; background: #eee; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 12px;">No Image</div>`
+                                        }
+                                        <div style="flex: 1;">
+                                            <h3 style="margin: 0 0 12px 0; color: #333; font-size: 1.2em;">${event.title}</h3>
+                                            <p style="margin: 4px 0; color: #666;"><strong>📅 ${event.date_formatted || event.date}</strong></p>
+                                            ${event.default_time || event.time ? `<p style="margin: 4px 0; color: #666;">🕐 ${event.default_time || event.time}</p>` : ''}
+                                            <p style="margin: 4px 0; color: #666;">📍 <strong>${(event.venue_display || event.venue || venue).toUpperCase()}</strong></p>
+                                            ${event.age_restriction ? `<p style="margin: 4px 0; color: #666;">🔞 ${event.age_restriction}</p>` : ''}
+                                            ${event.suggested_price || event.suggestedPrice ? `<p style="margin: 4px 0; color: #666;">💰 <strong>${event.suggested_price || event.suggestedPrice}</strong></p>` : ''}
+                                            ${event.description ? `<p style="margin: 12px 0; color: #555; font-size: 0.95em; line-height: 1.5; padding: 10px; background: #f8f9fa; border-radius: 4px;">${event.description.substring(0, 300)}${event.description.length > 300 ? '...' : ''}</p>` : ''}
+                                            ${event.ticket_url || event.ticketLink ? `<a href="${event.ticket_url || event.ticketLink}" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; padding: 10px 16px; background: #007cba; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">🎫 Get Tickets</a>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')
+                        }
+                    </div>
+                `;
+
+                const popupWindow = window.open('', 'eventsPopup', 'width=900,height=700,scrollbars=yes,resizable=yes');
+                if (popupWindow) {
+                    popupWindow.document.write(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <title>${venue.toUpperCase()} Shows - Test</title>
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        </head>
+                        <body style="margin: 0; padding: 0; background: #f5f5f5;">
+                            ${popupContent}
+                        </body>
+                        </html>
+                    `);
+                    popupWindow.document.close();
+                    resultDiv.innerHTML = '<div class="success">✅ Popup opened successfully!</div>';
+                } else {
+                    resultDiv.innerHTML = '<div class="error">❌ Failed to create popup window (popup blocker?)</div>';
+                }
+
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        // Auto-test on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('API Base URL:', BASE_URL);
+            document.getElementById('events-result').innerHTML = `
+                <div style="background: #e3f2fd; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
+                    <strong>API Base URL:</strong> ${BASE_URL}<br>
+                    <strong>Current Domain:</strong> ${getCurrentDomain()}<br>
+                    <em>Click the buttons above to test the API endpoints</em>
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "name": "farewell-howdy-admin-worker",
+  "version": "1.0.0",
+  "description": "Unified admin backend worker for Farewell & Howdy venues",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler publish",
+    "deploy:production": "wrangler publish --env production",
+    "tail": "wrangler tail",
+    "preview": "wrangler dev --local"
+  },
+  "dependencies": {
+    "linkedom": "^0.16.8",
+    "@cloudflare/workers-types": "^4.20240620.0"
+  },
+  "devDependencies": {
+    "wrangler": "^3.57.2"
+  },
+  "keywords": ["cloudflare", "worker", "admin", "api"],
+  "author": "Farewell & Howdy",
+  "license": "MIT"
+}

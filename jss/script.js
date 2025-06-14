@@ -25,7 +25,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const sortSelect = document.getElementById('sort-select');
 
   // Constants / Config
-  const BASE_URL = 'https://fygw0.kcmo.xyz'; // Worker endpoint
+  // Determine the correct API base URL based on current domain
+  const getCurrentDomain = () => window.location.hostname;
+  const getApiBaseUrl = () => {
+    const domain = getCurrentDomain();
+    // Use the new unified admin backend for API calls
+    if (domain === 'dev.farewellcafe.com') {
+      return 'https://fwhyadmin-dev.your-subdomain.workers.dev';
+    } else if (domain === 'farewellcafe.com') {
+      return 'https://admin.farewellcafe.com';
+    }
+    // For local development, use the admin backend dev server
+    return 'https://fwhyadmin-dev.your-subdomain.workers.dev';
+  };
+  
+  const BASE_URL = getApiBaseUrl();
   const CACHE_EXPIRY_MS = 15 * 60 * 1000;    // 15 minutes
   const cache = new Map(); // Simple in-memory cache
 
@@ -146,49 +160,76 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // Use unified events endpoint with venue filtering, fallback to legacy
+      // Use new unified events API endpoint with venue filtering
       let url, response, data;
       
       if (showPast) {
-        // For archives, use the existing archives endpoint
-        url = `${BASE_URL}/archives?type=${state}`;
-        response = await fetch(url);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch archives: ${response.statusText}`);
+        // For archives, use the unified events endpoint with date filtering
+        url = `${BASE_URL}/api/events/list?venue=${state}&past=true&thumbnails=true`;
+        try {
+          response = await fetch(url);
+          if (!response.ok) {
+            // Fallback to legacy archives endpoint
+            url = `${BASE_URL}/archives?type=${state}`;
+            response = await fetch(url);
+          }
+          data = await response.json();
+        } catch (error) {
+          console.warn('Unified API not available, trying legacy endpoint:', error);
+          // Fallback to legacy
+          url = `${BASE_URL}/archives?type=${state}`;
+          response = await fetch(url);
+          data = await response.json();
         }
-        data = await response.json();
       } else {
-        // For upcoming events, use legacy list endpoint (unified doesn't exist yet)
-        url = `${BASE_URL}/list/${state}`;
-        response = await fetch(url);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch flyers: ${response.statusText}`);
+        // For upcoming events, use the new unified events endpoint
+        url = `${BASE_URL}/api/events/list?venue=${state}&thumbnails=true&limit=20`;
+        try {
+          response = await fetch(url);
+          if (!response.ok) {
+            // Fallback to legacy list endpoint
+            url = `${BASE_URL}/list/${state}`;
+            response = await fetch(url);
+          }
+          data = await response.json();
+        } catch (error) {
+          console.warn('Unified API not available, trying legacy endpoint:', error);
+          // Fallback to legacy
+          url = `${BASE_URL}/list/${state}`;
+          response = await fetch(url);
+          data = await response.json();
         }
-        data = await response.json();
       }
       
       // Transform data to match expected flyer format
-      // Legacy endpoint returns array directly, unified would have .events property
-      const transformedData = Array.isArray(data) ? data.map(event => ({
+      // New unified API returns {events: [...], total: number, venue: string}
+      // Legacy endpoint returns array directly
+      let events;
+      if (data.events) {
+        // New unified API format
+        events = data.events;
+      } else if (Array.isArray(data)) {
+        // Legacy API format
+        events = data;
+      } else {
+        events = [];
+      }
+
+      const transformedData = events.map(event => ({
         id: event.id,
         title: event.title,
-        imageUrl: event.flyerThumbnail || event.flyerUrl || event.imageUrl,
+        // New API provides thumbnail_url, fallback to legacy fields
+        imageUrl: event.thumbnail_url || event.flyerThumbnail || event.flyer_url || event.flyerUrl || event.imageUrl,
         date: event.date || event.eventDate,
-        time: event.time || event.eventTime,
-        venue: event.venue || event.type || state, // legacy uses 'type' field
+        time: event.default_time || event.time || event.eventTime,
+        venue: event.venue_display || event.venue || event.type || state,
         description: event.description,
-        suggestedPrice: event.suggestedPrice,
-        ticketLink: event.ticketLink
-      })) : (data.events || []).map(event => ({
-        id: event.id,
-        title: event.title,
-        imageUrl: event.flyerThumbnail || event.flyerUrl || event.imageUrl,
-        date: event.date || event.eventDate,
-        time: event.time || event.eventTime,
-        venue: event.venue || event.type || state,
-        description: event.description,
-        suggestedPrice: event.suggestedPrice,
-        ticketLink: event.ticketLink
+        suggestedPrice: event.suggested_price || event.suggestedPrice,
+        ticketLink: event.ticket_url || event.ticketLink,
+        ageRestriction: event.age_restriction,
+        // New fields from unified API
+        dateFormatted: event.date_formatted,
+        thumbnailUrl: event.thumbnail_url
       }));
 
       // Store in cache
@@ -232,13 +273,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /**
    * Initializes (or re-initializes) the slideshow for the current state & sort selection.
+   * Uses the new slideshow API endpoint for better ordering control.
    */
   async function initSlideshow() {
     const currentState = body?.dataset.state; // 'farewell' or 'howdy'
     const sortValue = sortSelect ? sortSelect.value : 'soonest'; // default to soonest if undefined
 
     const showPast = (sortValue === 'past'); // Decide if we fetch archives or upcoming
-    allFlyers = await fetchFlyers(currentState, showPast);
+    
+    if (!showPast) {
+      // For upcoming events, try the new slideshow endpoint first for better ordering
+      try {
+        const slideshowUrl = `${BASE_URL}/api/events/slideshow?venue=${currentState}`;
+        const response = await fetch(slideshowUrl);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Using slideshow API endpoint:', data);
+          // Convert slideshow format to flyer format
+          allFlyers = (data.slideshow || []).map(slide => ({
+            id: slide.id,
+            title: slide.title,
+            imageUrl: slide.thumbnail_url || slide.image_url,
+            date: slide.date,
+            venue: slide.venue,
+            // Add slideshow order for potential custom sorting
+            order: slide.order || 0
+          }));
+        } else {
+          throw new Error('Slideshow endpoint not available');
+        }
+      } catch (error) {
+        console.log('Slideshow API not available, falling back to events list:', error);
+        // Fallback to regular events list
+        allFlyers = await fetchFlyers(currentState, showPast);
+      }
+    } else {
+      // For past events, use the regular fetchFlyers function
+      allFlyers = await fetchFlyers(currentState, showPast);
+    }
 
     // You could do further sorting here if needed.
     displayedFlyers = allFlyers;
@@ -507,26 +579,196 @@ document.addEventListener('DOMContentLoaded', () => {
   // --------------------------
 
   /**
-   * Generate and display events listing popup content
+   * Generate and display events listing popup content with thumbnails
    * @param {string} venue - 'howdy' or 'farewell'
    */
   async function displayEventsPopup(venue) {
     console.log('displayEventsPopup called with venue:', venue);
     console.log('BASE_URL:', BASE_URL);
     try {
-      // Use legacy endpoint directly since unified doesn't exist yet
-      const endpoint = `${BASE_URL}/list/${venue}`;
-      console.log('Calling endpoint:', endpoint);
-      const upcomingResponse = await fetch(endpoint);
-      if (!upcomingResponse.ok) {
-        throw new Error(`Legacy endpoint failed: ${upcomingResponse.status} ${upcomingResponse.statusText}`);
-      }
-      const upcomingData = await upcomingResponse.json();
-      console.log('Legacy endpoint success, events count:', upcomingData.length);
+      // Use new unified API endpoint with thumbnails
+      const endpoint = `${BASE_URL}/api/events/list?venue=${venue}&thumbnails=true&limit=50`;
+      console.log('Calling unified API endpoint:', endpoint);
       
-      // Legacy endpoint returns array directly
-      const upcomingEvents = Array.isArray(upcomingData) ? upcomingData : [];
+      let upcomingEvents = [];
+      
+      try {
+        const response = await fetch(endpoint);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Unified API success:', data);
+          upcomingEvents = data.events || [];
+        } else {
+          throw new Error(`Unified API failed: ${response.status}`);
+        }
+      } catch (error) {
+        console.warn('Unified API not available, falling back to legacy:', error);
+        // Fallback to legacy endpoint
+        const legacyEndpoint = `${BASE_URL}/list/${venue}`;
+        console.log('Calling legacy endpoint:', legacyEndpoint);
+        const legacyResponse = await fetch(legacyEndpoint);
+        if (!legacyResponse.ok) {
+          throw new Error(`Legacy endpoint failed: ${legacyResponse.status} ${legacyResponse.statusText}`);
+        }
+        const legacyData = await legacyResponse.json();
+        upcomingEvents = Array.isArray(legacyData) ? legacyData : [];
+      }
+      
       console.log('Final events array:', upcomingEvents.length, 'events');
+
+      // Create popup content with enhanced styling and thumbnails
+      let popupContent = `
+        <div style="padding: 20px; font-family: var(--font-hnm11); background: var(--card-bg-color); min-height: 100vh;">
+          <h2 style="text-align: center; margin-bottom: 30px; color: var(--text-color); border-bottom: 2px solid var(--nav-border-color); padding-bottom: 10px;">
+            ${venue.toUpperCase()} UPCOMING SHOWS
+          </h2>
+      `;
+
+      if (upcomingEvents.length === 0) {
+        popupContent += `
+          <p style="text-align: center; color: var(--text-color); font-style: italic;">
+            No upcoming shows found.
+          </p>
+        `;
+      } else {
+        upcomingEvents.forEach(event => {
+          // Use date_formatted from unified API if available, fallback to formatting
+          const formattedDate = event.date_formatted || (() => {
+            const eventDate = new Date(event.date || event.eventDate);
+            return eventDate.toLocaleDateString('en-US', {
+              weekday: 'short',
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric'
+            });
+          })();
+
+          // Get thumbnail from unified API or fallback to legacy fields
+          const thumbnailUrl = event.thumbnail_url || event.flyerThumbnail || event.flyer_url || event.imageUrl;
+          const venueDisplay = event.venue_display || (event.venue || event.type || venue).toUpperCase();
+          const eventTime = event.default_time || event.time || event.eventTime;
+          const suggestedPrice = event.suggested_price || event.suggestedPrice;
+          const ticketUrl = event.ticket_url || event.ticketLink;
+
+          popupContent += `
+            <div style="border: 1px solid var(--nav-border-color); margin: 15px 0; padding: 20px; 
+                        background: rgba(255,255,255,0.95); border-radius: 8px; 
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.2s ease;">
+              <div style="display: flex; gap: 20px; align-items: flex-start;">
+                ${thumbnailUrl ? `
+                  <img src="${thumbnailUrl}" alt="${event.title}" 
+                       style="width: 100px; height: 100px; object-fit: cover; border-radius: 6px; 
+                              flex-shrink: 0; border: 2px solid var(--nav-border-color);">
+                ` : `
+                  <div style="width: 100px; height: 100px; background: var(--nav-border-color); 
+                              border-radius: 6px; display: flex; align-items: center; justify-content: center; 
+                              color: white; font-size: 12px; text-align: center; flex-shrink: 0;">
+                    No Image
+                  </div>
+                `}
+                <div style="flex: 1;">
+                  <h3 style="margin: 0 0 12px 0; color: var(--text-color); font-size: 1.2em; 
+                             line-height: 1.3; font-weight: bold;">
+                    ${event.title}
+                  </h3>
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+                              gap: 8px; margin-bottom: 12px;">
+                    <p style="margin: 0; color: var(--text-color); display: flex; align-items: center; gap: 8px;">
+                      <span style="font-size: 1.1em;">📅</span>
+                      <strong>${formattedDate}</strong>
+                    </p>
+                    ${eventTime ? `
+                      <p style="margin: 0; color: var(--text-color); display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.1em;">🕐</span>
+                        ${eventTime}
+                      </p>
+                    ` : ''}
+                    <p style="margin: 0; color: var(--text-color); display: flex; align-items: center; gap: 8px;">
+                      <span style="font-size: 1.1em;">📍</span>
+                      <strong>${venueDisplay}</strong>
+                    </p>
+                    ${event.age_restriction ? `
+                      <p style="margin: 0; color: var(--text-color); display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.1em;">🔞</span>
+                        ${event.age_restriction}
+                      </p>
+                    ` : ''}
+                    ${suggestedPrice ? `
+                      <p style="margin: 0; color: var(--text-color); display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.1em;">💰</span>
+                        <strong>${suggestedPrice}</strong>
+                      </p>
+                    ` : ''}
+                  </div>
+                  ${event.description ? `
+                    <p style="margin: 12px 0; color: var(--text-color); font-size: 0.95em; 
+                              line-height: 1.5; padding: 10px; background: rgba(0,0,0,0.05); 
+                              border-radius: 4px; border-left: 3px solid var(--nav-border-color);">
+                      ${event.description.substring(0, 300)}${event.description.length > 300 ? '...' : ''}
+                    </p>
+                  ` : ''}
+                  ${ticketUrl ? `
+                    <a href="${ticketUrl}" target="_blank" rel="noopener" 
+                       style="display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; 
+                              padding: 10px 16px; background: var(--button-bg-color); 
+                              color: var(--button-text-color); text-decoration: none; 
+                              border-radius: 6px; font-size: 0.95em; font-weight: bold; 
+                              transition: all 0.2s ease; border: 2px solid transparent;">
+                      <span style="font-size: 1.1em;">🎫</span>
+                      Get Tickets
+                    </a>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      popupContent += `
+          <div style="text-align: center; margin-top: 20px;">
+            <small style="color: var(--text-color); opacity: 0.7;">
+              Switch between HOWDY and FAREWELL modes to see different venue listings
+            </small>
+          </div>
+        </div>
+      `;
+
+      console.log('Popup content generated successfully');
+      return popupContent;
+    } catch (error) {
+      console.error('Error fetching events for popup:', error);
+      
+      // Special handling for CORS errors
+      if (error.message.includes('NetworkError') || error.message.includes('CORS')) {
+        return `
+          <div style="padding: 20px; text-align: center;">
+            <h2 style="color: var(--text-color); margin-bottom: 20px;">
+              ${venue.toUpperCase()} SHOWS
+            </h2>
+            <p style="color: #ea4110; margin-bottom: 15px;">
+              Unable to load events due to CORS restrictions.
+            </p>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 15px;">
+              This is a temporary issue with cross-origin requests from dev.farewellcafe.com to the API server.
+            </p>
+            <p style="color: #666; font-size: 0.9em;">
+              <strong>To view events:</strong><br>
+              • Visit <a href="https://fwhy.kcmo.xyz" target="_blank" style="color: #007bff;">fwhy.kcmo.xyz</a> directly<br>
+              • Or contact the admin to update CORS settings for dev.farewellcafe.com
+            </p>
+          </div>
+        `;
+      }
+      
+      return `
+        <div style="padding: 20px; text-align: center;">
+          <p style="color: #ea4110;">Error loading events: ${error.message}</p>
+          <p style="color: #666; font-size: 0.9em;">Please try again later or check console for details.</p>
+        </div>
+      `;
+    }
+  }
 
       // Create popup content
       let popupContent = `
