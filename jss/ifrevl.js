@@ -89,6 +89,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const link = event.target.closest('a.open-popup');
 
     if (link && link instanceof HTMLAnchorElement) {
+        // Skip show listings - let script.js handle these
+        if (link.classList.contains('cal-link-listing') || link.getAttribute('href') === '#shows') {
+          return; // Don't handle show listings here
+        }
+        
         event.preventDefault(); // Prevent default link navigation
 
         const url = link.getAttribute('href');

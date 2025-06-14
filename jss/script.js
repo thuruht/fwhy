@@ -146,30 +146,50 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // Use unified events endpoint with venue filtering
-      const url = showPast
-        ? `${BASE_URL}/events/venue?venue=${state}&past=true`
-        : `${BASE_URL}/events/venue?venue=${state}`;
-
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch flyers: ${response.statusText}`);
+      // Use unified events endpoint with venue filtering, fallback to legacy
+      let url, response, data;
+      
+      if (showPast) {
+        // For archives, use the existing archives endpoint
+        url = `${BASE_URL}/archives?type=${state}`;
+        response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch archives: ${response.statusText}`);
+        }
+        data = await response.json();
+      } else {
+        // For upcoming events, try unified endpoint first
+        try {
+          url = `${BASE_URL}/events?venue=${state}`;
+          response = await fetch(url);
+          if (!response.ok) {
+            throw new Error('Unified endpoint failed');
+          }
+          data = await response.json();
+        } catch (error) {
+          console.warn('Unified events endpoint failed, trying legacy:', error);
+          // Fallback to legacy list endpoint
+          url = `${BASE_URL}/list/${state}`;
+          response = await fetch(url);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch flyers: ${response.statusText}`);
+          }
+          data = await response.json();
+        }
       }
-
-      const data = await response.json();
       
       // Transform data to match expected flyer format
       const transformedData = data.events ? data.events.map(event => ({
         id: event.id,
         title: event.title,
-        imageUrl: event.flyerThumbnail || event.flyerUrl,
-        date: event.date,
-        time: event.time,
-        venue: event.venue,
+        imageUrl: event.flyerThumbnail || event.flyerUrl || event.imageUrl,
+        date: event.date || event.eventDate,
+        time: event.time || event.eventTime,
+        venue: event.venue || state,
         description: event.description,
         suggestedPrice: event.suggestedPrice,
         ticketLink: event.ticketLink
-      })) : [];
+      })) : (Array.isArray(data) ? data : []);
 
       // Store in cache
       cache.set(cacheKey, { data: transformedData, timestamp: now });
@@ -491,11 +511,37 @@ document.addEventListener('DOMContentLoaded', () => {
    * @param {string} venue - 'howdy' or 'farewell'
    */
   async function displayEventsPopup(venue) {
+    console.log('displayEventsPopup called with venue:', venue);
     try {
-      // Fetch events from unified endpoint
-      const upcomingResponse = await fetch(`${BASE_URL}/events/venue?venue=${venue}`);
-      const upcomingData = await upcomingResponse.json();
-      const upcomingEvents = upcomingData.events || [];
+      // Fetch events from unified endpoint - try the list endpoint first as fallback
+      let upcomingResponse;
+      let upcomingData;
+      
+      try {
+        // Try the unified events endpoint first
+        console.log('Trying unified events endpoint...');
+        upcomingResponse = await fetch(`${BASE_URL}/events?venue=${venue}`);
+        if (!upcomingResponse.ok) {
+          throw new Error('Unified endpoint failed');
+        }
+        upcomingData = await upcomingResponse.json();
+        console.log('Unified endpoint success:', upcomingData);
+      } catch (error) {
+        console.warn('Unified events endpoint failed, trying legacy:', error);
+        // Fallback to legacy endpoint
+        console.log('Trying legacy list endpoint...');
+        upcomingResponse = await fetch(`${BASE_URL}/list/${venue}`);
+        if (!upcomingResponse.ok) {
+          throw new Error('Legacy endpoint also failed');
+        }
+        upcomingData = await upcomingResponse.json();
+        console.log('Legacy endpoint success, events count:', upcomingData.length);
+        // Transform legacy format to expected format
+        upcomingData = { events: upcomingData || [] };
+      }
+      
+      const upcomingEvents = upcomingData.events || upcomingData || [];
+      console.log('Final events array:', upcomingEvents.length, 'events');
 
       // Create popup content
       let popupContent = `
@@ -513,7 +559,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
       } else {
         upcomingEvents.forEach(event => {
-          const eventDate = new Date(event.date);
+          const eventDate = new Date(event.date || event.eventDate);
           const formattedDate = eventDate.toLocaleDateString('en-US', {
             weekday: 'short',
             year: 'numeric',
@@ -524,8 +570,8 @@ document.addEventListener('DOMContentLoaded', () => {
           popupContent += `
             <div style="border: 1px solid var(--nav-border-color); margin: 10px 0; padding: 15px; background: rgba(255,255,255,0.9);">
               <div style="display: flex; gap: 15px; align-items: flex-start;">
-                ${event.flyerThumbnail ? `
-                  <img src="${event.flyerThumbnail}" alt="${event.title}" 
+                ${(event.flyerThumbnail || event.imageUrl) ? `
+                  <img src="${event.flyerThumbnail || event.imageUrl}" alt="${event.title}" 
                        style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px; flex-shrink: 0;">
                 ` : ''}
                 <div style="flex: 1;">
@@ -534,10 +580,10 @@ document.addEventListener('DOMContentLoaded', () => {
                   </h3>
                   <p style="margin: 4px 0; color: var(--text-color); font-weight: bold;">
                     📅 ${formattedDate}
-                    ${event.time ? ` at ${event.time}` : ''}
+                    ${event.time || event.eventTime ? ` at ${event.time || event.eventTime}` : ''}
                   </p>
                   <p style="margin: 4px 0; color: var(--text-color);">
-                    📍 ${event.venue.toUpperCase()}
+                    📍 ${(event.venue || venue).toUpperCase()}
                   </p>
                   ${event.suggestedPrice ? `
                     <p style="margin: 4px 0; color: var(--text-color);">
@@ -573,12 +619,14 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       `;
 
+      console.log('Popup content generated successfully');
       return popupContent;
     } catch (error) {
       console.error('Error fetching events for popup:', error);
       return `
         <div style="padding: 20px; text-align: center;">
-          <p style="color: #ea4110;">Error loading events. Please try again later.</p>
+          <p style="color: #ea4110;">Error loading events: ${error.message}</p>
+          <p style="color: #666; font-size: 0.9em;">Please try again later or check console for details.</p>
         </div>
       `;
     }
@@ -594,11 +642,14 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (link && (link.classList.contains('open-popup') || link.getAttribute('href') === '#shows')) {
       event.preventDefault();
+      console.log('Show listings popup triggered');
       
       // Determine venue from current state
       const currentState = body?.dataset.state || 'farewell';
+      console.log('Current venue state:', currentState);
       
       // Generate popup content
+      console.log('Fetching events for popup...');
       const popupContent = await displayEventsPopup(currentState);
       
       // Create and show popup window
@@ -620,6 +671,9 @@ document.addEventListener('DOMContentLoaded', () => {
           </html>
         `);
         popupWindow.document.close();
+        console.log('Popup window created successfully');
+      } else {
+        console.error('Failed to create popup window');
       }
     }
   });
