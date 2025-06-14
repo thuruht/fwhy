@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>FAREWELL | HOWDY | KCMO - Howdy and Farewell - Kansas City</title>
+    <link rel="icon" type="image/x-icon" href="./img/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="./css/ccssss.css">
+    <script src="./jss/gsap-public/minified/gsap.min.js"></script>
+    <script src="./jss/gsap-public/minified/ScrollTrigger.min.js"></script>
+    <script src="./jss/gsap-public/minified/MotionPathPlugin.min.js"></script>
+    <script src="./jss/gsap-public/minified/CustomEase.min.js"></script>
+    <script defer src="./jss/ansik.js"></script>
+    <script defer src="./jss/script.js"></script>
+    <style>
+        
+        .about-content-card {
+            
+            width: 93%; 
+            margin: 0 auto; /* Center the card */
+        }
+
+        .about-image-main {
+          float: right; /* Float the main image left */
+          width: 60%;  /* Adjust width */
+          max-width: 469px; 
+    margin:32px;
+          display: block;
+        }
+
+        .sad-cookie-aside {
+          float: right; /* Float the cookie image right */
+          width: 30%;   /* Adjust width */
+          max-width: 160px; /* Adjust max pixel width */
+          margin-left: 20px; /* Space between text and image */
+          margin-bottom: 10px; /* Space below */
+          margin-top: 5px;
+          margin-right:32px;
+          text-align: center;
+        }
+
+        .sad-cookie-aside img {
+          max-width: 100%;
+          height: auto;
+          display: block;
+          margin-bottom: 5px;
+          margin-left: auto; /* Center within aside */
+          margin-right: auto; /* Center within aside */
+        }
+
+        .sad-cookie-aside .sad-cookie-caption {
+          font-size: 0.9rem;
+          font-style: italic;
+          color: #555;
+          margin: 0;
+          line-height: 1.2;
+          font-family: var(--font-hnm11);
+          letter-spacing: normal;
+          text-shadow: none;
+          -webkit-text-stroke: unset;
+        }
+
+        /* Clearfix for the section containing floated elements */
+        .about-content-card section::after {
+          content: "";
+          display: table;
+          clear: both;
+        }
+
+         /* Mobile overrides for floats */
+        @media (max-width: 640px) {
+            .about-image-main,
+            .sad-cookie-aside {
+                float: none;
+                width: 80%; /* Adjust mobile width */
+                max-width: 250px; /* Adjust mobile max-width */
+                margin-left: auto;
+                margin-right: auto;
+                margin-top: 15px;
+                margin-bottom: 15px;
+            }
+        }
+
+img {
+margin-right:24px;
+}
+    </style>
+</head>
+
+<body data-state="farewell">
+    <header class="feader" style="min-height:212px;">
+        <div class="contain">
+            <div class="left">
+                <nav>
+                    <ul><li><a href="./index.html">HOME</a></li>
+                        <li><a href="./booking.htm">BOOKING</a></li>
+                        <li><a href="./more.htm">MORE</a></li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="right">
+                <h1 class="header-title">
+                    <span class="span2">FAREWELL</span>
+                    <span class="sulk drop-wiggle throb-element"> & HOWDY &nbsp;<span id="swico"><img src="./img/swap.png" class="insect flipp cocoon" alt="click-drag"></span></span>
+                </h1>
+            </div>
+        </div>
+    </header>
+
+    <main class="about-page-container" style="width: 100%;">
+
+        <div class="card about-content-card" id="tri">
+            <section>
+                <h2 style="color:var(--lima); text-align:left; margin-left:var(--padding-large);">ABOUT US</h2>
+
+                
+
+                <img src="./img/fp2.png" class="about-image-main" alt="idk" style="border:1px solid #333;">
+
+                <p class="nrml" style="font-size:1.6rem; line-height:1.8rem; font-weight:100; letter-spacing: 0.033rem;">
+                    Farewell is a music venue made of equal parts friendship, psycho-nonstop-construction, and love for DIY ethos and community.
+                </p>
+                <p class="nrml" style="font-size:1.6rem; line-height:1.8rem; font-weight:200; letter-spacing: 0.033rem;">
+                    Farewell started in 2018 after the closure of Rollerdog on Troost. We drove past the abandoned building that now holds Farewell and convinced the owner to lease us the space - despite there being no running water, sewer, or heat. The power halfway worked, so we immediately started throwing shows: Devil Master, Show Me The Body, Godmother, Cult Leader, and about 60 More in the first year. It was surreal to see the space grow so quickly and host incredible shows. It was also surreal to figure out how to plumb a new sewer line so people could stop pissing in the alleyway.
+                </p><aside class="sad-cookie-aside">
+                     <img class="flipp squi-rmbreth" src="./img/mune.png" alt="old logo">
+                     <p class="sad-cookie-caption"><em>the famed "sad cookie"</em></p>
+                </aside>
+                <p class="nrml" style="font-size:1.6rem; line-height:1.8rem; font-weight:100; letter-spacing: 0.033rem;">
+                    Covid hit and we cancelled the two dozen shows we had booked that March. After a few months of the space sitting dormant with the same stale beer cans on the floor, we started to build something new. We spent the next year and a half building a bar made of construction debris, free/found materials and anything else that was laying around. We miraculously convinced the city to give us a Liquor License and we’ve been learning and evolving ever since. In 2023 we started holding All Ages shows in our sister space next door, Howdy. We’ve found endless joy and fulfillment in making a space that’s safe for people to discover what DIY can mean. These spaces mean everything to us. DIY to us is about giving a shit and showing up for one another - in music and art - but also in the greater context of our lives.
+                </p>
+                <p class="nrml" style="font-size:1.6rem; line-height:1.8rem; font-weight:100; letter-spacing: 0.033rem;">
+                    Between both spaces we host about 250 shows a year, and get to spend incalculable amounts of quality time with the people we care about in this community.
+                </p>
+                <p class="nrml" style="font-size:1.6rem; line-height:1.8rem; font-weight:100; letter-spacing: 0.033rem;">
+                    In 2025 we’re tearing out some walls and fucking around with making even more space for people to come and find community and music. So stick around and see what we end up building next. Probably not another stuffed animal room.
+                </p>
+           </section>
+        </div>
+
+    </main>
+
+    <footer><div>
+        <p id="address">6515 STADIUM DRIVE, KANSAS CITY, MISSOURI</p></div>
+    </footer>
+</body>
+</html>

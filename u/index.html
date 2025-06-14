@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>fw/hy newz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <link rel="stylesheet" href="../css/ccssss.css">
+  <link rel="stylesheet" href="./news.css">
+  <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+</head>
+<body>
+  <div id="public-view">
+    <main>
+      <section id="public-posts">
+          <h2>Posts</h2>
+          <div id="public-posts-list" class="card">
+            Loading posts...
+          </div>
+      </section>
+      <section id="public-featured">
+          <h2>Featured</h2>
+          <div id="public-featured-content" class="card">
+             Loading featured...
+          </div>
+      </section>
+    </main>
+    <footer>
+      <button id="login-btn">Admin Login</button>
+    </footer>
+  </div>
+
+  <div id="admin-view" style="display: none;">
+    <header>
+        <h1>Admin Panel</h1>
+        <button id="logout-btn" style="float: right; margin: 5px;">Logout</button>
+    </header>
+    <main class="griddy-admin">
+      <div class="blog-content">
+        <section id="blog-posts-admin">
+          <h2 class="section-heading">Manage Posts</h2>
+          <div id="admin-posts-list" class="content-container">
+            Loading posts...
+          </div>
+        </section>
+        <form id="post-form" class="admin-form">
+          <h3 id="form-heading">Create New Post</h3>
+          <input type="hidden" id="post-id" name="id">
+          <label for="post-title">Title:</label>
+          <input type="text" id="post-title" name="title" required>
+          <label for="editor-container">Content:</label>
+          <div id="editor-container"></div>
+          <div style="display:none;">
+            <label for="post-image-upload">Image:</label>
+            <input type="file" id="post-image-upload" name="imageUpload" accept="image/*">
+            <div id="post-image-preview-container">
+                <img id="post-image-preview" src="" alt="Image Preview">
+                <span id="post-image-url-display"></span>
+                <button type="button" id="remove-post-image-btn">Remove Image</button>
+            </div>
+            <input type="hidden" id="post-image-url" name="imageUrl">
+            <progress id="upload-progress" value="0" max="100"></progress>
+          </div>
+          <div>
+            <button type="submit" id="submit-post-btn">Submit Post</button>
+            <button type="button" id="cancel-edit-btn">Cancel Edit</button>
+          </div>
+        </form>
+      </div>
+      <div class="admin-panel">
+         <h2 class="section-heading">Manage Featured Section</h2>
+         <div id="admin-featured-content" class="content-container">
+            <p><strong>Current Text:</strong> <span id="current-featured-text"></span></p>
+            <p><strong>Current YouTube URL:</strong> <span id="current-featured-youtube"></span></p>
+            <div id="current-featured-preview"></div>
+         </div>
+         <form id="featured-form" class="admin-form">
+            <label for="featured-text">Update Text:</label>
+            <textarea id="featured-text" name="text" rows="4" required></textarea>
+            <label for="youtube-url">YouTube Video URL:</label>
+            <input type="url" id="youtube-url" name="youtubeUrl" placeholder="https://www.youtube.com/watch?v=...">
+            <button type="submit">Update Featured Section</button>
+         </form>
+      </div>
+    </main>
+  </div>
+
+  <div id="login-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <h2>Login</h2>
+      <form id="login-form">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <p id="login-error"></p>
+        <button type="submit">Login</button>
+        <button type="button" id="cancel-login-btn">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.quilljs.com/1.3.7/quill.js"></script>
+  <script src="./news.js"></script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+ifrevl old ver 
+// ifrevl.js - Complete file with exact text preservation
+
+// Iframe resizing functions
+function resizeIframe(obj) {
+  obj.style.height = obj.contentWindow.document.documentElement.scrollHeight + 'px';
+}
+
+function setupContentResize(iframe) {
+  iframe.contentWindow.addEventListener('resize', function() {
+    resizeIframe(iframe);
+  });
+
+  const observer = new MutationObserver(function() {
+    resizeIframe(iframe);
+  });
+
+  observer.observe(iframe.contentWindow.document, {
+    childList: true,
+    subtree: true
+  });
+}
+
+function onIframeLoad(iframe) {
+  resizeIframe(iframe);
+  setupContentResize(iframe);
+}
+
+// URL generation for calendar links
+// Corrected version for ifrevl.js
+function generateUrls(state) {
+  const baseUrl = window.location.hostname;
+  // Define the base path WITHOUT the trailing slash
+  const eventPathBase = state === 'howdy' ? 'hyevent' : 'fwevent';
+  return {
+    // Add trailing slash specifically for the listings path
+    showListings: `https://${baseUrl}/${eventPathBase}/`,
+
+    // Use the base path and add the slash before the filename
+    icsFile: `https://${baseUrl}/${eventPathBase}/calendar.ics`,
+
+    // Encode the correct ICS URL
+    googleCalendar: `https://www.google.com/calendar/render?cid=${encodeURIComponent(`https://${baseUrl}/${eventPathBase}/calendar.ics`)}`
+  };
+}
+// Update calendar links with EXACT text preservation
+// Update calendar links for BOTH the main block and individual links by class
+function updateCalendarLinks() {
+  const state = document.body.dataset.state || 'farewell'; // Or 'howdy'
+  const urls = generateUrls(state); // Assumes generateUrls is defined correctly elsewhere
+
+  // --- Part 1: Update the main #credEt block ---
+  const credEtDiv = document.getElementById('credEt');
+  if (credEtDiv) {
+    // Define the full HTML content for the #credEt div
+    const mainBlockHtml = `
+<div>
+<hr> || <a href="${urls.showListings}" class="open-popup">shows</a> || <a href="${urls.icsFile}">.ics</a> || <a href="${urls.googleCalendar}" target="_blank">gcal</a> || <hr><small>(above links per venue ; toggle farewell/howdy to change!)</small><hr>
+<p><small>calendar graphic (and the other swell graphics and general layout of this site) designed by the excellent <a href="https://austinchapmandesign.com/" target="_blank" rel="noopener">austin chapman</a> - however, any parts of the site that you dislike, that are animated annoyingly, bitcrushed, badly implemented, or the like, may instead be blamed on me (<a href="https://ntapkc.com" target="_blank" rel="noopener">jojo</a>), with the exception of show/event flyers, which are variously sourced</small></p>
+</div>
+    `;
+    // Replace the content of the #credEt div
+    credEtDiv.innerHTML = mainBlockHtml;
+    console.log('[UpdateLinks] Updated #credEt block.');
+  } else {
+    console.warn('[UpdateLinks] Element with id="credEt" not found.');
+  }
+
+  // --- Part 2: Update individual links by class ---
+
+  // Update all "Show Listings" links by class
+  const listingLinks = document.querySelectorAll('.cal-link-listing');
+  listingLinks.forEach(link => {
+    if (link instanceof HTMLAnchorElement) {
+         link.href = urls.showListings;
+    }
+  });
+  if (listingLinks.length > 0) console.log(`[UpdateLinks] Updated ${listingLinks.length} '.cal-link-listing' links.`);
+
+  // Update all "ICS File" links by class
+  const icsLinks = document.querySelectorAll('.cal-link-ics');
+  icsLinks.forEach(link => {
+     if (link instanceof HTMLAnchorElement) {
+         link.href = urls.icsFile;
+     }
+  });
+  if (icsLinks.length > 0) console.log(`[UpdateLinks] Updated ${icsLinks.length} '.cal-link-ics' links.`);
+
+  // Update all "Google Calendar" links by class
+  const gcalLinks = document.querySelectorAll('.cal-link-gcal');
+  gcalLinks.forEach(link => {
+    if (link instanceof HTMLAnchorElement) {
+        link.href = urls.googleCalendar;
+    }
+  });
+  if (gcalLinks.length > 0) console.log(`[UpdateLinks] Updated ${gcalLinks.length} '.cal-link-gcal' links.`);
+
+  console.log(`[UpdateLinks] Link updates complete for state: ${state}`);
+}
+
+// Popup window handling
+function setupPopupLinks() {
+  document.querySelectorAll('.open-popup').forEach(link => {
+    link.addEventListener('click', function(event) {
+      event.preventDefault();
+      const url = this.getAttribute('href');
+      const popupWidth = 800;
+      const popupHeight = 600;
+      const left = (window.innerWidth - popupWidth) / 2;
+      const top = (window.innerHeight - popupHeight) / 2;
+      
+      const popup = window.open(
+        url,
+        '_blank',
+        `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,scrollbars=yes`
+      );
+
+      if (!popup) {
+        window.open(url, '_blank');
+      }
+    });
+  });
+}
+
+// Initialize everything when DOM loads
+document.addEventListener('DOMContentLoaded', function() {
+  // Set up calendar links
+  updateCalendarLinks();
+    setupPopupLinks();
+
+  // Watch for state changes
+  const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.attributeName === 'data-state') {
+        updateCalendarLinks();
+        setupPopupLinks();
+      }
+    });
+  });
+  observer.observe(document.body, {
+    attributes: true,
+    attributeFilter: ['data-state']
+  });
+
+
+  // Set up iframe auto-resizing
+  const iframes = document.querySelectorAll('iframe');
+  iframes.forEach(iframe => {
+    iframe.addEventListener('load', function() {
+      onIframeLoad(iframe);
+    });
+  });
+});
+
+// Window resize handler for iframes
+window.addEventListener('resize', function() {
+  document.querySelectorAll('iframe').forEach(iframe => {
+    if (iframe.contentWindow) {
+      resizeIframe(iframe);
+    }
+  });
+});
+
+  // Set up popups
+  setupPopupLinks();
