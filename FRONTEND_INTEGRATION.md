@@ -51,17 +51,20 @@ GET /archives?type={venue}
 ## Enhanced Features
 
 ### 1. Show Listings Popup
+
 - **Enhanced thumbnails**: 100px x 100px with proper fallbacks
 - **Better layout**: Grid-based responsive design
 - **More information**: Age restrictions, pricing, ticket links
 - **Professional styling**: Cards with shadows and proper spacing
 
 ### 2. Slideshow Display  
+
 - **Custom ordering**: Uses admin-controlled slideshow order
 - **Better images**: Prioritizes thumbnail_url for faster loading
 - **Fallback support**: Works with both new and legacy APIs
 
 ### 3. Venue-Specific Features
+
 - **Auto-population**: Venue defaults applied by backend
   - Farewell: "21+ unless with parent or legal guardian"
   - Howdy: "All ages" 
@@ -70,12 +73,14 @@ GET /archives?type={venue}
 ## Testing
 
 ### Created `api-test.html`
+
 - **Visual API testing**: Test all new endpoints with visual results
 - **Compatibility testing**: Verify fallback to legacy APIs works
 - **Popup testing**: Test enhanced popup functionality
 - **Error handling**: Verify graceful degradation
 
 ### Test URLs:
+
 - Events API: `/api/events/list?venue=all&thumbnails=true`
 - Slideshow API: `/api/events/slideshow?venue=farewell`
 - Legacy compatibility: `/list/farewell`
@@ -83,6 +88,7 @@ GET /archives?type={venue}
 ## Todo List Implementation Status
 
 ### ✅ Completed Frontend Updates
+
 - [x] **Merged calendar display** - Frontend now calls unified events API
 - [x] **Enhanced thumbnails** - Show listings popup displays thumbnails
 - [x] **Venue-specific defaults** - Auto-populated by backend API
@@ -91,6 +97,7 @@ GET /archives?type={venue}
 - [x] **Age restrictions** - Displays venue-appropriate age limits
 
 ### 🔄 Backend Integration Ready
+
 - [x] **API endpoints created** - All new endpoints implemented in admin backend
 - [x] **Fallback compatibility** - Legacy endpoints still work
 - [x] **Error handling** - Graceful degradation when APIs unavailable
@@ -121,10 +128,12 @@ GET /archives?type={venue}
 ## Files Modified
 
 ### Frontend Files
+
 - `jss/script.js` - Updated API integration and popup functionality
 - `api-test.html` - Created comprehensive API testing page
 
 ### Backend Files (in fwhyadmin repo)
+
 - Complete unified admin backend with all required endpoints
 - Session-based authentication system
 - Comprehensive admin dashboard

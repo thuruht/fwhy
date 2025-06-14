@@ -31,12 +31,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const domain = getCurrentDomain();
     // Use the new unified admin backend for API calls
     if (domain === 'dev.farewellcafe.com') {
-      return 'https://fwhyadmin-dev.your-subdomain.workers.dev';
+      return 'https://admin.farewellcafe.com';
     } else if (domain === 'farewellcafe.com') {
       return 'https://admin.farewellcafe.com';
     }
-    // For local development, use the admin backend dev server
-    return 'https://fwhyadmin-dev.your-subdomain.workers.dev';
+    // For local development, use the admin backend
+    return 'https://admin.farewellcafe.com';
   };
   
   const BASE_URL = getApiBaseUrl();
