@@ -1,41 +1,81 @@
-name = "fwhy-dev-front"
-main = "src/index.js"
+name = "fwhy-services" # Changed to a more general project name
+# main = "src/index.js" # This will be defined per environment
 compatibility_date = "2025-06-15"
 
-[site]
-bucket = "./"
+# Default site configuration (can be overridden per environment if needed)
+# [site]
+# bucket = "./" # Assuming root for the dev frontend, adjust if needed
 
-[env.production]
-name = "fwhy-dev-front"
+[env.dev_frontend] # Renamed for clarity
+name = "fwhy-dev-front" # Worker name for the dev frontend
+main = "src/index.js"   # Entry point for the dev frontend worker
 route = { pattern = "dev.farewellcafe.com/*", zone_name = "farewellcafe.com" }
+[env.dev_frontend.site]
+bucket = "./" # Static assets for the dev frontend
 
-[env.dev]
-name = "fwhy-dev-front-dev"
+# [env.dev] # This was the original [env.dev], maybe for local testing of the frontend
+# name = "fwhy-dev-front-dev"
+# No route, typically used for wrangler dev
+
+[env.admin]
+name = "fwhy-admin" # Worker name for the admin dashboard
+main = "admin-worker/fwhyadmin/dist/index.js" # Entry point for the admin worker (compiled TypeScript)
+route = { pattern = "admin.farewellcafe.com/*", zone_name = "farewellcafe.com" }
+# Admin worker likely doesn't serve a static site via bucket, but has API endpoints.
 
 # Define any environment variables you might need
-# [vars]
+# [vars] # These would be global vars
 # ENVIRONMENT = "production"
 
+# Example per-environment vars:
+# [env.dev_frontend.vars]
+# API_ENDPOINT = "https://api.example.com"
+
+# [env.admin.vars]
+# DB_HOST = "..."
+
 # If you need any secrets, define them here (set with wrangler secret put)
-# [secrets]
+# [secrets] # These would be global secrets
 # SECRET_KEY = "your-secret-key"
 
-# KV namespaces (if needed in the future)
+# Example per-environment secrets:
+# [env.admin.secrets]
+# ADMIN_PASSWORD_HASH = "..."
+
+# KV namespaces (can be defined globally or per environment)
 # [[kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"
 # id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-# preview_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
-# D1 databases (if needed in the future)
+# Example KV for admin
+# [[env.admin.kv_namespaces]]
+# binding = "ADMIN_KV"
+# id = "your_admin_kv_id"
+
+# D1 databases (can be defined globally or per environment)
 # [[d1_databases]]
 # binding = "DB"
 # database_name = "my-database"
 # database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 
-# R2 buckets (if needed in the future)  
+# Example D1 for admin
+# [[env.admin.d1_databases]]
+# binding = "UNIFIED_DB"
+# database_name = "unified-backend-db" # The actual D1 database name
+# database_id = "your_unified_d1_id"
+
+
+# R2 buckets (can be defined globally or per environment)
 # [[r2_buckets]]
 # binding = "MY_BUCKET"
 # bucket_name = "my-bucket"
+
+# Example R2 for blog images, perhaps used by both admin (for upload) and frontend (for display)
+# [[r2_buckets]]
+# binding = "BLOG_IMAGES_BUCKET"
+# bucket_name = "fwhy-blog-images" # Choose a unique bucket name
+# preview_bucket_name = "fwhy-blog-images-preview"
+
 
 # Analytics Engine (if needed)
 # [[analytics_engine_datasets]]

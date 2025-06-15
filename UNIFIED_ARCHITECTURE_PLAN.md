@@ -1,155 +1,285 @@
-# Unified Backend Architecture Plan
+# Unified Farewell Cafe & Howdy Venue: Architecture & Roadmap
 
-## Overview
-Consolidating all backend worker functionality into a single unified admin worker with enhanced features, plus creating a separate SPA for Howdy Thrift.
+**Last Updated: June 15, 2025**
 
-## 1. Unified Admin Worker Features
+**Document Purpose:** This document serves as the central, authoritative guide for the development, maintenance, and future evolution of the unified administrative backend and public-facing frontend for Farewell Cafe and the Howdy venue. It is intended for current and future development teams to ensure consistency, clarity, and adherence to the project vision.
 
-### Current Features to Consolidate
-From the chat-provided worker code (not old directory files):
-- **Events Management**: Create, edit, delete, and list events
-- **Flyer Upload & Management**: Image handling and thumbnails
-- **Newsletter/Blog System**: Content management and subscriber handling
-- **Gallery Management**: Image gallery features
-- **Admin Authentication**: Secure admin access
+## 1. Core Project Vision & "The Whole Point"
 
-### New Features to Add
-- **Drink Menu Editor**: Full CRUD operations for menu items
-- **Operating Hours Management**: Edit open/close times for both venues
-- **Venue-Specific Settings**: Separate configurations for Farewell vs Howdy
+The fundamental goal of this project is to:
 
-### Enhanced Admin Dashboard
-- **Unified Interface**: Single admin panel for all features
-- **Real-time Updates**: Live preview of changes
-- **Batch Operations**: Bulk editing capabilities
-- **Media Library**: Centralized asset management
+1.  **Create a single, modernized, and highly efficient administrative backend** for both "Farewell Cafe" and the "Howdy" venue. This central admin system, accessible via `admin.farewellcafe.com`, will streamline all key operational tasks: managing blog content, menus, comprehensive event listings (complete with flyers for slideshows, listings, and archives), flyer postings, business hours, and other administrative functions.
+2.  **Ensure this new system is a significant enhancement of the previous setup.** This means retaining core functionalities while vastly improving them with modern styling, crucial "extra fields" and data points (like dedicated flyer URLs for events), and a robust, maintainable, and consolidated Cloudflare-based infrastructure.
+3.  **Deliver a seamless, rich, and accurate experience on the public-facing frontend** (`dev.farewellcafe.com`). This includes ensuring that all content managed through the new admin panel—especially blog posts with their R2 images and slugs, and detailed event listings with their associated flyer images—is displayed correctly and effectively.
+4.  **Achieve this through critical technical upgrades and migrations:** This involves implementing unified authentication, migrating data from older systems (blog images from local files to R2, event data from disparate KVs into the unified D1 and their flyers to R2), standardizing configurations with a single `wrangler.jsonc`, and cleaning up redundant code and infrastructure.
 
-## 2. Menu Management System
+This project aims to replace and significantly upgrade the previous systems, drawing inspiration from the user experience of `farewellcafe.com` but with enhanced capabilities and a more resilient backend.
 
-### Database Schema
+## 2. Key Cloudflare Production Resource Configuration
+
+This section outlines the definitive Cloudflare resources to be used by the `fwhyadmin` worker (serving `admin.farewellcafe.com`) and potentially the frontend worker. The `wrangler.jsonc` file for the `admin` environment has been configured to bind only these resources. Any previously bound resources not listed here are considered deprecated for the `fwhyadmin` worker, and relevant data must be migrated to these unified resources.
+
+### 2.1. D1 Database (Primary Data Store)
+
+-   **Cloudflare D1 Database Name:** `fwhy_uni_db`
+-   **Cloudflare D1 Database ID:** `4f9ac7d3-ff64-45f5-a538-d8eb3b978f41`
+-   **Binding in `wrangler.jsonc` & Code:** `UNIFIED_DB`
+-   **Purpose:** Primary storage for blog posts, events, menu items, user data, and other structured application data.
+-   **Migration:** All relevant data from older D1 databases (e.g., `bl0wd1`, `farewell_list`, `fwhygal0r3_db`, `howdy_list`) must be migrated to `fwhy_uni_db`.
+
+### 2.2. R2 Bucket (Asset Storage)
+
+-   **Cloudflare R2 Bucket Name:** `fwhy-blog-images`
+-   **Binding in `wrangler.jsonc` & Code:** `BLOG_IMAGES_R2`
+-   **Purpose:** Storage for blog post images, event flyers, menu item images, and other static assets for the admin system and public site.
+-   **Public URL Prefix (IMPORTANT):** If this R2 bucket is made public (e.g., via a custom domain or the default `*.r2.dev` URL), that prefix needs to be configured in the application for generating public image URLs. Example: `https://pub-xxxxxxxx.r2.dev`. If not public, images must be served via a Worker.
+-   **Migration:** Blog images are being migrated from local files. Event flyers will be migrated. Any essential images from other R2 buckets (e.g., `unified-assets-dev`, `fyg410r3`) must be migrated to `fwhy-blog-images`.
+
+### 2.3. KV Namespaces (Key-Value Storage)
+
+-   **`EVENTS_KV`** (ID: `464d611d5ad8433cab6bcfba64d8424f`)
+    -   **Purpose:** Initially for migrating old event data. Long-term, event data will reside primarily in the `UNIFIED_DB`. This KV might be phased out for events post-migration or used for caching.
+    -   **Migration:** Data from `EVENTS_FAREWELL` and `EVENTS_HOWDY` to be migrated into `UNIFIED_DB` (events table). This KV binding might be temporary for the migration process.
+-   **`SESSIONS_KV`** (ID: `2038b95e785545af8486bc353c3cbe62`)
+    -   **Purpose:** Storage for admin user sessions.
+-   **`GALLERY_KV`** (ID: `3cd37bd71260436c8ed12078483e9fa4`)
+    -   **Purpose:** Storage for gallery configurations or data (if not moved to D1).
+-   **`BLOG_KV`** (ID: `6ee9ab6b71634a4eb3e66de82d8dfcdc`)
+    -   **Purpose:** Storage for blog-related settings or auxiliary data not suitable for D1 (e.g., view counters, temporary drafts if not in D1).
+-   **`CONFIG_KV`** (ID: `d54801ef0fb0443e850ee532ad1384b6`)
+    -   **Purpose:** General application configuration and settings (e.g., feature flags, site-wide messages).
+-   **Migration for other KVs:** Data from other previously used KV namespaces (e.g., `bl0wkv`, `fff_kv`) must be evaluated and migrated to one of the above unified KV namespaces or D1 if still needed.
+
+### 2.4. Cloudflare Worker Secrets
+
+-   **`ADMIN_PASSWORD_HASH`**: Bcrypt hash of the admin password for unified authentication.
+
+## 3. Core Data Structures & Schemas
+
+This section will be populated with the primary TypeScript interfaces and D1 table schemas as they are finalized.
+
+### 3.1. `BlogPost` (D1 Table: `blog_posts`)
+
 ```typescript
-interface DrinkMenu {
-  id: string;
-  venue: 'farewell' | 'howdy';
-  category: string; // 'beer', 'cocktails', 'wine', 'spirits', 'non-alcoholic'
-  name: string;
+// In: admin-worker/fwhyadmin/src/types/env.ts
+export interface BlogPost {
+  id: string; // UUID
+  title: string;
+  content: string; // HTML or Markdown
+  author_id?: string; // Optional: links to a user table
+  status: 'draft' | 'published' | 'archived';
+  published_at?: string; // ISO 8601 string
+  created_at: string; // ISO 8601 string
+  updated_at: string; // ISO 8601 string
+  tags?: string; // Comma-separated or JSON array
+  category?: string;
+  imageUrl?: string; // Full URL to image in R2 (e.g., fwhy-blog-images)
+  slug: string | null; // SEO-friendly URL slug (unique)
+}
+```
+*(D1 SQL schema for `blog_posts` table to be added here)*
+
+### 3.2. `Event` (D1 Table: `events`)
+
+```typescript
+// In: admin-worker/fwhyadmin/src/types/env.ts
+export interface EventType {
+  id: string; // UUID or unique identifier
+  title: string;
+  venue: 'farewell' | 'howdy'; // Or other relevant venue identifiers
+  date: string; // ISO 8601 date string e.g., "YYYY-MM-DD"
+  time?: string; // e.g., "HH:MM" or "HH:MM-HH:MM"
   description?: string;
-  price: number;
-  available: boolean;
-  featured: boolean;
-  created: string;
-  updated: string;
-}
-
-interface OperatingHours {
-  venue: 'farewell' | 'howdy';
-  dayOfWeek: number; // 0-6 (Sunday-Saturday)
-  openTime: string; // HH:MM format
-  closeTime: string; // HH:MM format
-  closed: boolean;
-  specialHours?: string; // Holiday notes, etc.
-}
-```
-
-### API Endpoints
-```
-POST /api/admin/menu/items - Create menu item
-GET /api/admin/menu/items?venue=farewell - List items
-PUT /api/admin/menu/items/:id - Update item
-DELETE /api/admin/menu/items/:id - Delete item
-
-POST /api/admin/hours - Update operating hours
-GET /api/admin/hours?venue=farewell - Get hours
-GET /api/public/hours?venue=farewell - Public hours endpoint
-```
-
-## 3. Howdy Thrift SPA Project
-
-### Separate Application
-- **Domain**: `thrift.howdybar.com` or `howdythrift.com`
-- **Technology**: Modern SPA (React/Vue/Vanilla)
-- **Admin Panel**: `admin.howdythrift.com`
-- **Features**: 
-  - Thrift store inventory management
-  - Item categorization and search
-  - Pricing and availability tracking
-  - Customer favorites/wishlist
-  - Sales reporting
-
-### Database Schema
-```typescript
-interface ThriftItem {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  price: number;
-  images: string[];
-  size?: string;
-  brand?: string;
-  condition: 'excellent' | 'good' | 'fair' | 'poor';
-  available: boolean;
-  featured: boolean;
-  tags: string[];
-  created: string;
-  updated: string;
+  age_restriction?: string;
+  suggested_price?: string;
+  ticket_url?: string;
+  flyer_url?: string; // Full URL to flyer image in R2 (e.g., fwhy-blog-images)
+  thumbnail_url?: string; // Optional: URL to thumbnail in R2
+  status?: 'active' | 'cancelled' | 'postponed' | 'past';
+  featured?: boolean;
+  slideshow_order?: number;
+  created_at: string; // ISO 8601 string
+  updated_at: string; // ISO 8601 string
+  created_by?: string; // Optional: links to a user table
+  last_modified_by?: string; // Optional: links to a user table
+  slug?: string; // SEO-friendly URL slug (unique, optional)
 }
 ```
 
-## 4. Implementation Plan
-
-### Phase 1: Unified Admin Worker
-1. **Consolidate existing workers** into single codebase
-2. **Add menu management** endpoints and UI
-3. **Add operating hours** management
-4. **Deploy to** `admin.farewellcafe.com`
-
-### Phase 2: Enhanced Admin UI
-1. **Build React-based** admin dashboard
-2. **Implement real-time** updates
-3. **Add bulk operations** and media library
-4. **Add user management** and permissions
-
-### Phase 3: Howdy Thrift SPA
-1. **Create separate** thrift store application
-2. **Build inventory** management system
-3. **Implement search** and filtering
-4. **Deploy to** dedicated subdomain
-
-## 5. Development Environment
-
-### Directory Structure
-```
-/
-├── admin-worker/          # Unified admin backend
-│   ├── src/
-│   │   ├── handlers/
-│   │   │   ├── events.js
-│   │   │   ├── menu.js
-│   │   │   ├── hours.js
-│   │   │   ├── newsletter.js
-│   │   │   └── gallery.js
-│   │   ├── middleware/
-│   │   ├── utils/
-│   │   └── index.js
-│   ├── admin-ui/         # Admin dashboard frontend
-│   └── wrangler.toml
-├── howdy-thrift/         # Separate thrift SPA
-│   ├── src/
-│   ├── admin/
-│   └── package.json
-└── main-site/            # Current website (this repo)
+**D1 SQL Schema for `events` table:**
+```sql
+CREATE TABLE IF NOT EXISTS events (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    venue TEXT CHECK(venue IN ('farewell', 'howdy')) NOT NULL,
+    date TEXT NOT NULL, -- ISO 8601 date string e.g., "YYYY-MM-DD"
+    time TEXT, -- e.g., "HH:MM" or "HH:MM-HH:MM"
+    description TEXT,
+    age_restriction TEXT,
+    suggested_price TEXT,
+    ticket_url TEXT,
+    flyer_url TEXT, -- URL to image in R2 (e.g., fwhy-blog-images bucket)
+    thumbnail_url TEXT, -- URL to thumbnail in R2 (optional)
+    status TEXT CHECK(status IN ('active', 'cancelled', 'postponed', 'past')) NOT NULL DEFAULT 'active',
+    featured BOOLEAN DEFAULT FALSE,
+    slideshow_order INTEGER, -- For ordering in slideshows
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by TEXT,
+    last_modified_by TEXT,
+    slug TEXT UNIQUE
+);
 ```
 
-### Deployment Strategy
-- **Main Site**: `farewellcafe.com` (current worker)
-- **Admin Panel**: `admin.farewellcafe.com` (unified admin worker)
-- **Thrift Store**: `howdythrift.com` (separate SPA)
-- **Thrift Admin**: `admin.howdythrift.com` (thrift admin)
+### 3.3. Menu Items (D1 Table: `menu_items`)
+*(To be defined)*
 
-## Next Steps
-1. **Review and consolidate** the chat-provided worker code
-2. **Design the unified admin** worker architecture
-3. **Implement menu and hours** management features
-4. **Plan the Howdy Thrift** SPA requirements
-5. **Set up development** environments and deployment pipelines
+### 3.4. Operating Hours (D1 Table: `operating_hours`)
+*(To be defined)*
+
+## 4. Project Roadmap & Phases
+
+This roadmap outlines the planned phases for development and deployment.
+
+### Phase 1: Backend Consolidation & Core Feature Migration (Current Focus)
+
+*   **Objective:** Establish the unified admin worker, migrate core data (blog, events), and ensure basic admin functionalities are operational.
+*   **Key Tasks:**
+    1.  **Finalize `wrangler.jsonc`:** Ensure all production bindings (D1, R2, KV, Secrets) are correct.
+    2.  **D1 Schema Setup:** Create/confirm all necessary tables (`blog_posts`, `events`, `menu_items`, `operating_hours`, `users` if needed) in `fwhy_uni_db`.
+    3.  **Authentication:** Implement and test unified admin authentication (session/cookie-based using `ADMIN_PASSWORD_HASH`).
+    4.  **Blog System Migration & Enhancement:**
+        *   Run migration script to move existing blog posts to D1 and images to R2 (`fwhy-blog-images`), generating slugs.
+        *   Update admin handlers for creating/editing blog posts to use D1 and R2, and generate slugs.
+        *   Ensure frontend can fetch and display blog posts with R2 images and slugs.
+    5.  **Event System Migration & Enhancement:**
+        *   Run migration script to move existing event data (from `EVENTS_FAREWELL`, `EVENTS_HOWDY` KVs) to the `events` table in D1, and upload flyers to R2.
+        *   Update admin handlers for creating/editing events to use D1 and R2 for flyers.
+        *   Ensure frontend can fetch and display events with R2 flyers for slideshows, listings, and archives.
+    6.  **Basic Admin Dashboard Structure:** Implement initial admin dashboard pages for managing blogs and events.
+*   **Deliverables:** Functional admin worker for blog and event management with migrated data; frontend displaying this content correctly.
+
+### Phase 2: Full Admin Feature Implementation
+
+*   **Objective:** Implement all remaining admin functionalities (Menu, Hours, etc.) and enhance the admin dashboard UI/UX.
+*   **Key Tasks:**
+    1.  **Menu Management System:**
+        *   Define D1 schema and `MenuItemType`.
+        *   Implement admin handlers and UI for CRUD operations on menu items (categories, descriptions, prices, images to R2).
+        *   Ensure frontend can display menus.
+    2.  **Operating Hours Management:**
+        *   Define D1 schema and `OperatingHoursType`.
+        *   Implement admin handlers and UI for managing hours for Farewell & Howdy.
+        *   Ensure frontend can display operating hours.
+    3.  **Gallery Management:** Review existing gallery system and integrate/migrate to unified admin if necessary (data to D1/KV, images to R2).
+    4.  **Flyer Management (General):** If flyers are managed independently of events, implement this.
+    5.  **Admin Dashboard Enhancements:** Improve UI/UX, add search/filtering, potentially a media manager for R2 assets.
+*   **Deliverables:** Fully functional admin panel for all core business operations.
+
+### Phase 3: Frontend Polish & Advanced Features
+
+*   **Objective:** Refine the public frontend, implement any advanced features, and conduct thorough testing.
+*   **Key Tasks:**
+    1.  **Frontend UI/UX Review & Polish:** Ensure `dev.farewellcafe.com` is polished, responsive, and user-friendly, accurately reflecting all data from the new backend.
+    2.  **Unified Popups & Slideshows:** Standardize and optimize these components.
+    3.  **SEO Optimization:** Ensure all content (especially blogs with slugs) is SEO-friendly.
+    4.  **Performance Optimization:** Optimize load times for frontend and backend.
+    5.  **Security Hardening & Review.**
+    6.  **Comprehensive Testing:** End-to-end testing of admin and frontend.
+*   **Deliverables:** A production-ready, polished, and robust system.
+
+### Phase 4: Howdy Thrift SPA (If pursued as separate project)
+
+*   **Objective:** Develop and deploy the separate Howdy Thrift SPA.
+*   **Details:** Refer to original "Howdy Thrift SPA Project" section if this is reactivated. This roadmap primarily focuses on the unified Farewell/Howdy admin and site.
+
+## 5. Data Migration Strategy - Detailed Notes
+
+*   **General Principle:** Migrate data from old sources (KVs, old D1s, local files) to the new unified resources (`fwhy_uni_db`, `fwhy-blog-images` R2, designated KVs).
+*   **Blog Migration:** (Covered in Phase 1) - `migration.ts` handler.
+*   **Event Migration:** (Covered in Phase 1) - `eventMigration.ts` handler. This involves reading from `EVENTS_FAREWELL` and `EVENTS_HOWDY` KVs, fetching/uploading flyers, and inserting into the `events` D1 table.
+    *   **Local Flyer Paths:** If old event flyer URLs are local file paths, a separate local script will be needed to read these files and upload them to R2. The worker-based migration can only fetch public HTTP URLs.
+*   **Menu/Hours/Other Data:** Specific migration scripts or manual data entry plans will be needed for these as their D1 schemas are finalized.
+*   **Backup:** Before running any large-scale migration, ensure backups of the source data (KVs, D1s) are taken if possible.
+
+## 6. Development & Deployment
+
+### 6.1. Code Structure (Primary Focus: `admin-worker/fwhyadmin`)
+
+```
+/home/jeltu/Desktop/fnow/
+└── admin-worker/
+    └── fwhyadmin/
+        ├── dist/                   # Compiled output
+        ├── src/
+        │   ├── handlers/           # Request handlers (blog.ts, events.ts, menu.ts, etc.)
+        │   ├── middleware/         # Authentication, error handling middleware
+        │   ├── types/              # TypeScript interfaces (env.ts, etc.)
+        │   ├── utils/              # Utility functions
+        │   └── index.ts            # Worker entry point, router setup
+        ├── package.json
+        ├── tsconfig.json
+        └── ... (other config files)
+```
+*(Frontend structure for `dev.farewellcafe.com` to be added if managed in this repo)*
+
+### 6.2. `wrangler.jsonc` (Key Snippet for `admin` environment)
+
+```jsonc
+// ... (full file in /home/jeltu/Desktop/fnow/wrangler.jsonc)
+    "admin": {
+      "name": "fwhy-admin",
+      "main": "admin-worker/fwhyadmin/dist/index.js", // Ensure this points to compiled JS
+      "routes": [
+        { "pattern": "admin.farewellcafe.com/*", "zone_name": "farewellcafe.com" }
+      ],
+      "vars": {
+        "ENVIRONMENT": "production"
+        // Add R2_PUBLIC_URL_PREFIX here if applicable
+      },
+      "kv_namespaces": [
+        { "binding": "EVENTS_KV", "id": "464d611d5ad8433cab6bcfba64d8424f" },
+        { "binding": "SESSIONS_KV", "id": "2038b95e785545af8486bc353c3cbe62" },
+        { "binding": "GALLERY_KV", "id": "3cd37bd71260436c8ed12078483e9fa4" },
+        { "binding": "BLOG_KV", "id": "6ee9ab6b71634a4eb3e66de82d8dfcdc" },
+        { "binding": "CONFIG_KV", "id": "d54801ef0fb0443e850ee532ad1384b6" }
+      ],
+      "d1_databases": [
+        { "binding": "UNIFIED_DB", "database_name": "fwhy_uni_db", "database_id": "4f9ac7d3-ff64-45f5-a538-d8eb3b978f41" }
+      ],
+      "r2_buckets": [
+        { "binding": "BLOG_IMAGES_R2", "bucket_name": "fwhy-blog-images" }
+      ],
+      "unsafe": {
+        "bindings": [
+          { "type": "plain_text", "name": "ADMIN_PASSWORD_HASH_PLAINTEXT_FOR_SETUP_ONLY", "text": "your_bcrypt_hash_here_during_dev_setup_then_use_secret" }
+        ]
+      }
+      // Secrets should be added via `wrangler secret put ADMIN_PASSWORD_HASH`
+    }
+// ...
+```
+**Note on `ADMIN_PASSWORD_HASH_PLAINTEXT_FOR_SETUP_ONLY`**: This is only for initial local development if direct secret access is tricky. For production and standard development, always use `wrangler secret put ADMIN_PASSWORD_HASH` and remove the unsafe binding.
+
+### 6.3. Deployment Commands (Example)
+
+-   **Admin Worker:** `wrangler deploy --env admin admin-worker/fwhyadmin/src/index.ts --name fwhy-admin`
+-   **Frontend Worker/Pages:** (Command depends on frontend setup, e.g., `wrangler pages deploy ...`)
+
+### 6.4. Development Workflow
+
+1.  **Branching:** Use feature branches (e.g., `feature/event-flyers`, `fix/blog-slug-generation`).
+2.  **Commits:** Follow conventional commit message format (e.g., `feat: add event flyer upload to admin`).
+3.  **Local Development:** Use `wrangler dev` for the admin worker.
+4.  **Testing:** Implement unit/integration tests where possible.
+5.  **Pull Requests:** Use PRs for code review before merging to main/production branch.
+
+## 7. Key Decisions & Open Questions Log
+
+*   **R2 Public URL Prefix:** Needs to be determined and configured if R2 bucket `fwhy-blog-images` is to serve images publicly directly. Otherwise, images need to be served via a Worker endpoint.
+*   **Migration of Local Event Flyers:** A strategy is needed if many old event flyers are stored as local file paths (worker migration can only fetch HTTP URLs).
+*   **Howdy Thrift SPA:** Status and priority to be confirmed.
+*   **Detailed Schemas for Menu/Hours:** To be defined in Phase 2.
+
+---
+*This document is a living guide and should be updated as the project evolves.*
