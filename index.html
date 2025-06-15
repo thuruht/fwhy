@@ -62,6 +62,129 @@
      #credEt a:hover {
         text-decoration: underline;
     }
+
+    /* --- Popup Styles --- */
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      cursor: pointer;
+    }
+
+    .event-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #0d0d0d;
+      border: 1px solid #333;
+      padding: 2rem;
+      z-index: 1001;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .popup-close {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      color: #fff;
+      font-size: 2.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .popup-close:hover {
+      color: #ff4500;
+    }
+
+    .popup-content {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .popup-thumbnail {
+      width: 200px;
+      height: auto;
+      object-fit: cover;
+      border: 1px solid #222;
+    }
+
+    .popup-details {
+      flex: 1;
+    }
+
+    .popup-details h2 {
+      font-family: var(--font-hnm11);
+      font-size: 2rem;
+      margin-top: 0;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .popup-details p {
+      font-family: var(--font-main);
+      font-size: 1rem;
+      color: #ccc;
+      margin: 0.5rem 0;
+    }
+
+    .popup-details .popup-description {
+      margin-top: 1rem;
+      font-style: italic;
+      white-space: pre-wrap;
+    }
+
+    .popup-price {
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: #ff4500;
+    }
+
+    .popup-ticket-link {
+      display: inline-block;
+      margin-top: 1.5rem;
+      padding: 10px 20px;
+      background-color: #ff4500;
+      color: #fff;
+      text-decoration: none;
+      font-family: var(--font-hnm11);
+      text-transform: uppercase;
+      border: none;
+      border-radius: 2px;
+      transition: background-color 0.3s ease;
+    }
+
+    .popup-ticket-link:hover {
+      background-color: #e03e00;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .event-popup {
+        padding: 1.5rem;
+      }
+      .popup-content {
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+      .popup-thumbnail {
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+      }
+      .popup-details h2 {
+        font-size: 1.5rem;
+      }
+    }
     
     </style>
 </head>

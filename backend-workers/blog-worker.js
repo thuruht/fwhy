@@ -17,7 +17,7 @@ export default {
         default-src 'self';
         script-src 'self' https://cdn.quilljs.com;
         style-src 'self' 'unsafe-inline' https://cdn.quilljs.com;
-        img-src 'self' data: https://*.youtube.com https://bl0wr2.jojo-829.r2.cloudflarestorage.com;
+        img-src 'self' data: https://*.youtube.com https://i.ytimg.com https://bl0wr2.jojo-829.r2.cloudflarestorage.com;
         frame-src https://www.youtube.com;
         font-src 'self' https://farewellcafe.com data:;
         connect-src 'self' https://*.cloudflare.com;

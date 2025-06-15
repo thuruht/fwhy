@@ -20,18 +20,43 @@ document.addEventListener('DOMContentLoaded', () => {
   let uploadItems = [];
   let uploadedCount = 0;
   
-  // Authentication
-  authForm.addEventListener('submit', (e) => {
+  // Authentication - Server-side validation
+  authForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const password = document.getElementById('adminPassword').value;
     
-    // Simple password check (in production, this should be server-side)
-    if (password === 'farewell2025' || password === 'howdy2025') {
-      isAuthenticated = true;
-      document.querySelector('.auth-section').style.display = 'none';
-      uploadInterface.style.display = 'block';
-      authError.style.display = 'none';
-    } else {
+    try {
+      // Send password to server for validation
+      const response = await fetch(`${GALLERY_WORKER_URL}/auth`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password })
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          isAuthenticated = true;
+          // Store auth token if provided
+          if (result.token) {
+            sessionStorage.setItem('authToken', result.token);
+          }
+          document.querySelector('.auth-section').style.display = 'none';
+          uploadInterface.style.display = 'block';
+          authError.style.display = 'none';
+        } else {
+          authError.textContent = result.message || 'Authentication failed';
+          authError.style.display = 'block';
+        }
+      } else {
+        authError.textContent = 'Invalid credentials';
+        authError.style.display = 'block';
+      }
+    } catch (error) {
+      console.error('Authentication error:', error);
+      authError.textContent = 'Authentication service unavailable';
       authError.style.display = 'block';
     }
   });
