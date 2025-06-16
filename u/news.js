@@ -1,4 +1,4 @@
-const API_BASE = '/bl10g';
+const API_BASE = 'https://admin.farewellcafe.com/api/blog';
 let sessionToken = sessionStorage.getItem("sessionToken");
 let editingPostId = null;
 
