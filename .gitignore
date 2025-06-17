@@ -37,3 +37,9 @@ Thumbs.db
 
 # Admin backend (separate git repository)
 admin-worker/
+
+# Legacy/backup files
+backup_legacy/
+admin-worker/backup_legacy/
+*.ts~
+*.tsx~
