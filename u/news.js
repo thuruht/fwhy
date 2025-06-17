@@ -216,10 +216,35 @@ async function loadPublicPosts() {
 async function loadPublicFeatured() {
     try {
         const { data: featured } = await fetchApi('/featured', { method: 'GET', excludeAuth: true });
-        publicFeaturedContentEl.innerHTML = `
-            <p>${featured.text.replace(/</g, '&lt;')}</p>
-            ${featured.youtubeUrl ? createYouTubeEmbed(featured.youtubeUrl) : ''}
-        `;
+        
+        // Handle new video carousel structure
+        if (featured.videos && Array.isArray(featured.videos)) {
+            const videoCarousel = featured.videos.map(video => `
+                <div class="video-item" style="margin-bottom: 20px; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
+                    <div style="position: relative; padding-bottom: 56.25%; height: 0;">
+                        ${createYouTubeEmbed(video.url)}
+                    </div>
+                    <div style="padding: 10px;">
+                        <h3 style="margin: 0; font-size: 16px;">${video.title.replace(/</g, '&lt;')}</h3>
+                    </div>
+                </div>
+            `).join('');
+            
+            publicFeaturedContentEl.innerHTML = `
+                <div class="video-carousel">
+                    <h2 style="margin-bottom: 20px;">Featured Videos</h2>
+                    ${videoCarousel}
+                </div>
+            `;
+        } else if (featured.text) {
+            // Fallback for old text-based structure
+            publicFeaturedContentEl.innerHTML = `
+                <p>${featured.text.replace(/</g, '&lt;')}</p>
+                ${featured.youtubeUrl ? createYouTubeEmbed(featured.youtubeUrl) : ''}
+            `;
+        } else {
+            publicFeaturedContentEl.innerHTML = `<p>No featured content available</p>`;
+        }
     } catch (err) {
         publicFeaturedContentEl.innerHTML = `<p>Error loading featured content: ${err.message}</p>`;
     }

@@ -329,11 +329,26 @@ document.addEventListener('DOMContentLoaded', () => {
    * Toggles the body state between 'howdy' and 'farewell', then re-fetches slideshow data.
    */
   function toggleState() {
-    if (!body) return;
+    console.log('toggleState called');
+    if (!body) {
+      console.error('Body element not found!');
+      return;
+    }
+    
     const currentState = body.dataset.state;
     const newState = currentState === 'farewell' ? 'howdy' : 'farewell';
+    console.log(`Switching from ${currentState} to ${newState}`);
+    
     body.dataset.state = newState;
-    body.classList.toggle('howdy-active'); // for theming
+    
+    // Properly manage the howdy-active class for theming
+    if (newState === 'howdy') {
+      body.classList.add('howdy-active');
+      console.log('Added howdy-active class');
+    } else {
+      body.classList.remove('howdy-active');
+      console.log('Removed howdy-active class');
+    }
 
     // Update dynamic text
     if (farewellSpan) {
@@ -514,7 +529,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Toggle state when user clicks the "sulk" span (HOWDY / FAREWELL)
   if (howdySpan) {
-    howdySpan.addEventListener('click', toggleState);
+    console.log('Adding click listener to howdySpan:', howdySpan);
+    howdySpan.addEventListener('click', (e) => {
+      console.log('State toggle clicked!');
+      e.preventDefault();
+      toggleState();
+    });
+    // Also make it visually clear it's clickable
+    howdySpan.style.cursor = 'pointer';
+  } else {
+    console.error('howdySpan element not found!');
   }
 
   // Archives button
@@ -915,9 +939,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Set an initial state 
   if (body) {
-    body.dataset.state = body.dataset.state || 'farewell'; 
-    toggleImages('farewell'); 
-    updateSocialLinks('farewell'); 
+    const initialState = body.dataset.state || 'farewell';
+    body.dataset.state = initialState;
+    
+    // Initialize CSS class based on initial state
+    if (initialState === 'howdy') {
+      body.classList.add('howdy-active');
+    } else {
+      body.classList.remove('howdy-active');
+    }
+    
+    toggleImages(initialState); 
+    updateSocialLinks(initialState); 
   }
 
   // Initialize the slideshow (default to soonest events)
