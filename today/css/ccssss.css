@@ -1,0 +1,1399 @@
+
+/* farewellcafe.com/css/ccssss.css */
+
+:root {
+    /* Colors */
+    --pupil: #d990ff;
+    --redd: #ff2b13;
+    --lima: #b0ee00;
+    --blew: #00e2ff;
+    --primary-bg-color: #b0ee00;
+    --secondary-bg-color: #D990FF;
+    --accent-color: #ff2b13;
+    --text-color: #010101;
+    --header-text-shadow: rgba(0, 0, 0, 0.5);
+    --nav-bg-color: #ffffff;
+    --nav-border-color: #000000;
+    --card-bg-color: #f9f9f9;
+    --button-bg-color: #b0ee00;
+    --button-text-color: #000000;
+    --header-bg: var(--primary-bg-color) url('../img/bg4.png') center/cover no-repeat; /* Combined background */
+	--howder-bg: var(--secondary-bg-color) url('../img/bg7.png') center/cover no-repeat;
+    /* Fonts */
+    --font-howder: 'ds', sans-serif;
+    --font-main: 'hnb2', sans-serif;
+    --font-secondary: 'kb', sans-serif;
+    --font-db: 'db', sans-serif;
+    --font-mt: 'mt', sans-serif;
+    --font-hnm11: 'hnm11', sans-serif;
+    --font-hnmi12: 'hnmi12', sans-serif;
+    --font-hnbi4: 'hnbi4', sans-serif;
+
+    /* Spacing */
+    --padding-small: 24px;
+    --padding-medium: 32px;
+    --padding-large: 36px;
+
+    /* Other */
+    --transition-speed: 0.3s;
+}
+/* ==============================
+   2. Font Faces
+============================== */
+
+@font-face {
+    font-family: 'ds';
+    src: url('../fnt/ds.woff2') format('woff2');
+      font-weight: normal;
+  font-style: normal;
+    font-display: swap;
+  }
+
+@font-face {
+  font-family: 'db';
+  src: url('../fnt/db.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+     font-display: swap;
+}
+
+@font-face {
+  font-family: 'kb';
+  src: url('../fnt/kb.woff2') format('woff2');
+        font-weight: normal;
+  font-style: normal;
+     font-display: swap;
+}
+
+@font-face {
+  font-family: 'mt';
+  src: url('../fnt/mrt.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+     font-display: swap;
+}
+
+@font-face {
+  font-family: 'hnm11';
+  src: url('../fnt/hnm11.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+     font-display: swap;
+}
+
+@font-face {
+  font-family: 'hnmi12';
+  src: url('../fnt/hnmi12.woff2') format('woff2');
+    font-weight: normal;
+  font-style: normal;
+     font-display: swap;
+}
+
+@font-face {
+  font-family: 'hnb2';
+  src: url('../fnt/hnb2.woff2') format('woff2');
+    font-weight: normal;
+  font-style: normal;
+     font-display: swap;
+}
+
+@font-face {
+  font-family: 'hnbi4';
+  src: url('../fnt/hnbi4.woff2') format('woff2');
+    font-weight: normal;
+  font-style: normal;
+     font-display: swap;
+}
+/* ==============================
+   3. Global Styles
+============================== */
+*, *::before, *::after {
+  box-sizing: border-box; /* Ensures consistent sizing across elements */
+}
+
+body {
+  display: flex; /* Enables Flexbox for body */
+  flex-direction: column; /* Stacks child elements vertically */
+  align-items: center; /* Centers child elements horizontally */
+  justify-content: flex-start; /* Aligns child elements to the top */
+  margin: 0 auto;
+  margin-bottom:24px;
+  font-family: var(--font-hnm11);
+  background-color: #f0ffff;
+  color: var(--text-color);
+  padding: var(--padding-medium);
+  text-align: center;
+  gap:var(--padding-medium);
+}
+
+/* ==============================
+   4. Header Styles
+============================== */
+.feader {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Aligns the contain div to the start (left) */
+  width: 100%; 
+background: var(--header-bg); /* Use the combined background variable */
+  color: var(--text-color);
+  padding: 0;
+  border: 1px solid var(--nav-border-color);
+ 
+}
+.howder { background:var(--howder-bg); border:1px solid var(--nav-border-color);  align-items:center; justify-content:center;}
+.contain {
+  display: flex;
+  width: 100%;
+  min-height:286px;
+  margin: 0; /* Removes centering to align left */
+  gap: 32px;
+  align-items: center; /* Vertically centers left and right */ 
+}
+
+.left {
+  width: 128px; /* Adjusted for better navigation width */
+  flex-shrink: 0; /* Prevents shrinking on smaller screens */
+}
+
+.right {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center; /* Centers content horizontally */
+  align-items: center;     /* Centers content vertically */
+}
+
+.feader h1 {
+  margin: 0;
+  color: var(--text-color);
+  display: flex;
+  align-items: center; /* Vertically centers spans within h1 */
+  text-align: center;
+}
+
+/* ==============================
+   19. Responsive <h1> Styles with clamp()
+============================== */
+.header-title {
+  position: relative; /* Establishes a positioning context for absolutely positioned children */
+  font-family: 'db';
+  font-size: clamp(1.8rem, 8vw, 6rem); /* Responsive font size */
+  z-index:1;
+  margin: 0;
+  color: var(--text-color);
+  transition: font-size 0.3s ease; /* Smooth transition for resizing */
+}
+
+.header-title .sulk {
+  position: absolute; /* Positions "HOWDY" relative to .header-title */
+  bottom: -14px;       /* Adjusts vertical placement */
+  right: -2px;       /* Adjusts horizontal placement */
+  transform: rotate(-15deg); /* Angles the "HOWDY" text */
+  font-family: 'kb';
+  color: #fff;
+  font-size: clamp(1.2rem, 4vw, 3.0rem); /* Responsive font size relative to .header-title */
+  letter-spacing: 0.1em; cursor: crosshair;
+  
+  /* 1px Black Outline for 'kb' Font */
+  -webkit-text-stroke: 1px black; /* For WebKit browsers */
+  text-shadow:
+    -1px -1px 0 #000,
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000; /* Fallback for other browsers */
+}
+
+.sulk:hover {
+  transform: scale(1.4) rotate(12deg);
+  color: #ff2b13;
+  z-index:3;
+}
+
+
+.header-title .span2 {
+  color: var(--secondary-bg-color);
+  font-family: 'db';
+  font-size: clamp(3.5rem, 11.3vw, 18.5em); /* Responsive font size relative to .header-title */
+  letter-spacing: 0.002em;
+  font-weight: 300;
+  margin-left: 12px; /* Spacing between text and span2 */
+  margin-top:0; margin-bottom:0;
+  /* 1px Black Outline*/
+  -webkit-text-stroke: 1px black; /* For WebKit browsers */
+  text-shadow:
+    -1px -1px 0 #000,
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000,
+    -13px 13px 0px var(--nav-border-color);
+}
+
+/* ==============================
+   5. Navigation Styles
+============================== */
+nav ul {
+  display: flex; /* Enables Flexbox for nav items */
+  flex-direction: column; /* Stacks nav items vertically */
+  align-items: flex-start; /* Aligns items to the start (left) */
+  list-style: none;
+  padding: 0;
+  margin: 0; margin-top:12px;
+  gap: 0px; /* Space between nav items */
+  background-color: var(--nav-bg-color);
+  border: 1px solid var(--nav-border-color);
+  border-left: 0px;
+  box-shadow: 0px 18px 0px #000;
+}
+
+nav ul li {
+  width: 100%; /* Makes each nav item take full width of nav */
+  padding: 10px 15px; /* Enhanced padding for better click area */
+  margin: 0;
+  border: 1px solid var(--nav-border-color);
+  background: var(--nav-bg-color);
+  font-family: var(--font-hnbi4);
+  font-size: 1rem;
+  text-align: left; /* Align text to the left */
+  letter-spacing: 0.05em;
+  line-height: 1.5;
+  font-weight: normal;
+  border-radius: 0px; /* Rounded corners */
+  transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+}
+
+nav ul li:hover {
+  background-color: var(--nav-border-color);
+  color: #ffffff; border: 1px solid #fc00ff;
+}
+
+nav ul li a {
+  text-decoration: none;
+  color: inherit; /* Inherits color from parent for hover effect */
+  font-family: var(--font-main);
+  text-align: left;
+  display: block; /* Ensures the entire area is clickable */
+}
+
+/* ==============================
+   6. Calendar Styles
+============================== */
+#calendar {
+  background: #ffffff;
+  color: var(--text-color);
+  padding: 0;  width: 96%;
+  margin: 0 auto;
+  /*margin-bottom:12px;*/
+  border: 1px solid var(--nav-border-color);
+  border-radius: 0px; /* Optional: Rounded corners */
+    grid-column: 1;      /* left column */
+  grid-row: 1 / 3;     /* spans row 1 and row 2 */
+
+}
+
+.cally { max-width: 100%; height: auto; vertical-align: middle;}
+
+
+
+
+/* ==============================
+   7. Newsletter Styles
+============================== */
+#newsletter {
+  background: var(--secondary-bg-color);
+  text-align: center;
+  padding: var(--padding-medium);
+    width: 96%;
+  margin: 0 auto;
+  /*margin-bottom:12px;*/
+  border: 1px solid var(--nav-border-color);
+  border-radius: 0px; /* Optional: Rounded corners */
+  color:#000;
+  grid-column: 2;      /* right column */
+  grid-row: 1;         /* row 1 only */
+}
+
+#newsletter h2 { color: #fff;
+    -webkit-text-stroke: 1px #000000; /* Black outline */
+     text-shadow: -1px -1px 0 #000000, 1px -1px 0 #000000, -1px 1px 0 #000000, 1px 1px 0 #000000; /*Black text shadow*/
+
+  font-family: var(--font-secondary);
+  margin-bottom: var(--padding-small);
+
+}
+#newsletter p {
+  margin-bottom: var(--padding-medium);
+}
+
+#newsletter form {
+  display: flex;
+  flex-direction: column; /* Stack elements vertically */
+  gap: 0.5rem; /* Reduced spacing between input and button */
+  align-items: stretch; /* Ensures children take full width */
+  width: 93%; /* Ensure form takes full width of the container */
+  max-width: 666px; /* Limit form width for better readability */
+  margin: 0 auto; /* Center the form within its container */
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+}
+
+#newsletter input#newsletter-email {
+  padding: 10px 10px; /* Reduced padding for a slimmer appearance */
+  border: 1px solid var(--nav-border-color);
+  border-radius: 0px;
+  font-size: 1rem;
+  width: 93%; /* Ensures input takes full width of the form */
+  height: 35px; /* Set a fixed height */
+  box-sizing: border-box; /* Ensures padding is included in the height */
+}
+
+#newsletter button {
+  background: var(--button-bg-color);
+  color: var(--button-text-color);
+  font-family: var(--font-main);
+  border: 1px solid var(--nav-border-color);
+  padding: 10px 10px; /* Adjusted padding to match input height */
+  letter-spacing: 0.05em;
+  line-height: 1.5;
+  border-radius: 0px;
+  cursor: pointer;
+  width: 128px;
+  transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease, transform var(--transition-speed) ease;
+  height: 35px; /* Matches the input's height */
+  box-sizing: border-box; /* Ensures padding is included in the height */
+}
+
+#newsletter button:hover {
+  background: #a0e600;
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
+#newsletter button:active {
+  transform: scale(0.98);
+}
+
+/* ==============================
+   8. Contact Styles
+============================== */
+#contact {
+  background: #B0EE00;
+  text-align: center;
+  padding: var(--padding-medium);
+width: 96%;
+  margin: 0 auto;
+  /*margin-bottom:12px;*/
+  border: 1px solid var(--nav-border-color);
+  border-radius: 0px; /* Optional: Rounded corners */
+  grid-column: 1;      
+  grid-row: 3;     
+  font-family: 'hnm11';
+  font-weight:900;
+}
+
+#contact h2 {
+  font-family: var(--font-secondary);
+  margin-bottom: var(--padding-small);
+  color:#fff;
+ color: #000;
+    -webkit-text-stroke: 1px #ffffff; /* White outline */
+     text-shadow: -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff; /*White text shadow*/
+     }
+
+#contact p {
+  margin-bottom: var(--padding-medium);
+}
+
+#contact .social-icons {
+  margin-bottom: var(--padding-medium);
+}
+
+#contact .social-icons a {
+  margin: 0 10px;
+  color: var(--text-color);
+  text-decoration: none;
+  font-weight: bold;
+  transition: color var(--transition-speed) ease;
+}
+
+#contact .social-icons a:hover {
+  color: var(--accent-color);
+}
+
+#contact img {
+  width: 200px;
+  height: auto;
+  margin: 0 auto;
+  display: block;
+  border: 0px solid transparent; /* Moved from inline to CSS */
+  border-radius: 0px; /* Optional: Rounded corners */
+  opacity:0.8;
+}
+
+#newsletter img {
+  width: 200px;
+  height: auto;
+  margin: 0 auto;
+  display: block;
+  border: 0px solid transparent; /* Moved from inline to CSS */
+  border-radius: 0px; /* Optional: Rounded corners */
+  opacity:0.8;
+}
+
+
+/* ==============================
+   9. Event Styles
+============================== */
+#event {
+  background: #00E2FF;
+  text-align: center;
+  padding: var(--padding-medium);
+ width: 96%;
+  margin: 0 auto;
+  /*margin-bottom:12px;*/
+  border: 1px solid var(--nav-border-color);
+  border-radius: 0px; /* Optional: Rounded corners */
+ grid-column: 2;      
+  grid-row: 2 / 4;     /* spans row 2 and row 3 */
+}
+
+
+
+/* ==============================
+   10. Footer Styles
+============================== */
+footer div {
+  background: #ffffff;
+  color: var(--text-color);
+  border: 1px solid var(--nav-border-color);
+  box-shadow: -12px 18px 0px var(--nav-border-color);
+  padding: var(--padding-small);
+  width: 100%;
+  margin: 20px 0;
+  text-align: center;
+  border-radius: 0px; /* Optional: Rounded corners */
+  letter-spacing: 0.5rem; 
+  line-height: 1.3rem; 
+  font-size: 1.2rem;
+}
+
+footer {
+  width: 100%;
+}
+
+/* ==============================
+   11. Typography
+============================== */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  padding: 0.2rem 0;
+}
+
+h2 {
+  font-family: var(--font-secondary);
+  font-size: 3.8rem;
+  margin-bottom: var(--padding-small);
+  
+  /* 1px Black Outline for 'kb' Font */
+  -webkit-text-stroke: 1px black; /* For WebKit browsers */
+  text-shadow:
+    -1px -1px 0 #000,
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000; /* Fallback for other browsers */
+}
+
+p {
+  margin-left: 0.5em;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;   /* 2 columns */
+  grid-template-rows: auto auto auto;  /* 3 rows */
+  grid-gap: 32px;
+  gap:32px;
+  padding: var(--padding-medium);
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  justify-content: center; /* Centers the grid items */
+  align-items: center; /* Centers the grid items */
+  align-items: center;
+  justify-items: center; /* Centers the grid items */
+}
+
+/* Media query: single column below 640px (or whatever size you want) */
+@media (max-width: 1001px) {
+  .grid-container {
+    /* Only 1 column, as many auto-rows as needed */
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(4, auto);
+    grid-gap: 32px; /* You can adjust the gap for smaller screens */
+  }
+  
+  /* Force each section to occupy full width in a new row */
+  #calendar {
+    grid-column: 1;
+    grid-row: auto; /* Each item in its own row in 1-column layout */
+  }
+  #newsletter {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  #event {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  #contact {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+
+}
+@media (max-width: 640px) {
+/*
+  .header-title .span2 {
+  color: var(--secondary-bg-color);
+  font-family: 'db';
+  font-size: 3rem; /* Responsive font size relative to .header-title */
+/*  font-weight: 700;
+  margin-left: 10px; /* Spacing between text and span2 */
+  /* 1px Black Outline*/
+/*  -webkit-text-stroke: 1px black; /* For WebKit browsers */
+/*  text-shadow:
+    -1px -1px 0 #000,
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000,
+    -12px 15px 6px var(--nav-border-color);
+} */
+.contain {display:block;}
+nav ul {display:flex; flex-direction:row;}
+.left {width:100%; display:block;}
+.right {width:100%; display: block;}
+nav ul li { font-size:0.8rem;}
+
+.header-title .span2 {text-align:center; align-content:center; align-items:center;}
+
+.header-title {text-align:center; align-content:center; align-items:center; padding:20px; padding-top:40px;}
+
+header {text-align:center; align-content:center; align-items:center; margin-bottom:36px;}
+}
+
+/* ==============================
+   13. Grid Items Styling
+============================== */
+.card {
+  background-color: var(--card-bg-color);
+  padding: var(--padding-small);
+  border: 1px solid var(--nav-border-color);
+  box-shadow: -17px 20px 0px var(--nav-border-color);
+  margin: 0 auto;
+  transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+  display: block;
+  color:#000;
+}
+
+
+.card img {
+  max-width: 100%;
+  height: auto;
+ vertical-align:middle;
+  margin: 0 auto;
+  gap:0;
+}
+
+
+
+/* ==============================
+   17. Button Styles
+============================== */
+button {
+  background: var(--button-bg-color);
+  color: var(--button-text-color);
+  font-family: var(--font-main);
+  border: 1px solid var(--nav-border-color);
+  padding: 10px 10px;
+  letter-spacing: 0.05em;
+  line-height: 1.5;
+  border-radius: 0px;
+  cursor: pointer;
+  width: 128px;
+  transition: background-color var(--transition-speed) ease  0.4s, color var(--transition-speed) ease  0.4s, transform var(--transition-speed) ease 0.4s; 
+}
+
+button:hover {
+  background: #58e880;
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* ==============================
+   18. Additional Styles
+============================== */
+.card#contact h3 {color: #ffffff; font-family: 'ds'; font-weight: 200; font-size: 1.75rem; -webkit-text-stroke: 1px #000000; /* White outline */
+     text-shadow: -1px -1px 0 #a0e600, 1px -1px 0 #000000, -1px 1px 0 #000000, 1px 1px 0 #e60000; /*White text shadow*/}
+.card#newsletter h3 {color: #000000; font-family: 'ds'; font-weight: 200; font-size: 1.75rem; -webkit-text-stroke: 1px #ffffff; /* White outline */
+     text-shadow: -1px -1px 0 #e60000, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #a0e600; /*White text shadow*/}
+
+
+/* Links within cards or other components */
+a {
+    color: var(--accent-color); /* Default link color */
+    text-decoration: none;
+    transition: color var(--transition-speed) ease;
+}
+
+a:hover {
+  color: #e60000; /* Darkened accent color */
+}
+.card h2 {font-size: 3rem; color: var(--pupil); letter-spacing:0.22rem; font-weight:200;
+    -webkit-text-stroke: 1px #000000; /* Black outline */
+     text-shadow: -1px -1px 0 #000000, 1px -1px 0 #000000, -1px 1px 0 #000000, 1px 1px 0 #000000; /*Black text shadow*/
+}
+body.howdy-active .card h2 { color: var(--redd);
+}
+
+
+body.howdy-active a:hover { /* Only the hover color changes */
+    color: var(--link-hover-color);
+}
+
+
+body.howdy-active {
+    --text-color: #000;
+    --newsletter-bg-color: #ff2b13;
+    --header-bg-color: #00e2ff;
+    --button-bg-color: #00e2ff;
+    --link-hover-color: #d990ff;
+    --header-bg: var(--header-bg-color) url('../img/bg3.png') center/cover no-repeat; /* Howdy background */
+}
+
+body.howdy-active .header-title {
+    font-family: 'mt';
+}
+body.howdy-active .header-title .sulk {
+    font-size: clamp(1.3rem, 2.7vw, 2.9rem); cursor: crosshair;
+}
+body.howdy-active .header-title .sulk:hover {
+  color: var(--link-hover-color);
+}
+
+
+body.howdy-active .header-title .span2 {
+    font-family: 'mt';
+    font-weight: 200;
+    letter-spacing: 0.00209em;
+    color: #ff2b13;
+ /*  scale: 1.16 0.8; */
+    font-size: clamp(4.5rem, 13.5vw, 21em); 
+    margin:0 auto;
+   margin-left:22px;
+     /* 1px Black Outline*/
+  -webkit-text-stroke: 1px black; /* For WebKit browsers */
+  text-shadow:
+    -1px -1px 0 #000,
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000,
+    -14px 18px 0px var(--nav-border-color);
+}
+
+body.howdy-active #event {background-color: #b0ee00;
+}
+
+body.howdy-active #contact {
+    background-color: #00e2ff;
+}
+
+body.howdy-active #newsletter {
+    background-color: #ff2b13;
+}
+
+body.howdy-active #newsletter input {
+    border-color: #000000;
+}
+
+body.howdy-active #newsletter button {
+    border-color: #000000;
+    background-color: #00e2ff;
+}
+
+body.howdy-active #contact h2 { color: #fff;
+    -webkit-text-stroke: 1px #000000; /* Black outline */
+     text-shadow: -1px -1px 0 #000000, 1px -1px 0 #000000, -1px 1px 0 #000000, 1px 1px 0 #000000; /*Black text shadow*/
+}
+body.howdy-active #newsletter h2 { color: #000;
+    -webkit-text-stroke: 1px #ffffff; /* White outline */
+     text-shadow: -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff; /*White text shadow*/
+}
+footer p{
+    color: #000;
+}
+
+.flip {
+    -webkit-transform: rotate(-352deg);
+    -moz-transform: rotate(-352deg);
+    -o-transform: rotate(-352deg);
+    transform: rotate(-352deg);
+    display: inline-block;
+}
+.flipp {
+    -webkit-transform: rotate(345deg);
+    -moz-transform: rotate(345deg);
+    -o-transform: rotate(345deg);
+    transform: rotate(345deg);
+    display: inline-block;
+}
+.sme
+{
+font-family:'hnbi4',sans-serif;
+}
+
+
+/* Sorting Controls Styles */
+.sorting-controls {
+    margin-top: 10px;
+    display: flex;
+    gap: 0.5rem; 
+    padding: 2px 4px;
+   
+
+}
+
+
+
+.drop-crawl, .drop-wiggle {
+  opacity: 0;
+
+  position: relative; 
+  cursor: crosshair; 
+  }
+
+.insect {
+
+ object-fit: cover; opacity : 0.69;
+  
+}
+.cocoon {
+  background-color: #E9D38222; 
+  text-shadow: 1px 1px 3px #A0522D44; 
+}
+
+.sopc { background-color: #00000004;  border: 1px dotted #fc00ff33; }
+.social-icons, .sopc { font-family:'hnbi4'; font-weight: 200; list-style: none; align-items: center; text-align: center; color: #3f3f3f; text-transform: lowercase; font-size:1rem; padding: 0;
+  margin: 0;
+  gap: 10px;  border-radius: 100%; -webkit-text-stroke: 1px #ffffff; /* White outline */
+     text-shadow: -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff;}
+
+.pp  {color: #454545; font-family: 'kb'; font-weight: 100; font-size: 1.87rem; margin-bottom:var(--padding-large); -webkit-text-stroke: 1px #000000; /* White outline */ letter-spacing:0.11rem; text-align: left; width: 100%;
+     text-shadow: -1px -1px 0 #a0e600, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #e60000; /*White text shadow*/}
+      
+.nrml {color: #030403; font-family: 'kb'; font-weight: 200; font-size: 1.87rem;  margin-bottom:var(--padding-large); letter-spacing:0.1rem; text-align: left; 
+     text-shadow: 1px 1px 0px #faeffb33; line-height:1.33;}
+     
+/* styles.css */
+
+
+/* Slideshow Container */
+.slideshow-container {
+    position: relative;
+    /*max-width: 800px;*/
+    margin: 0 auto;
+    overflow: hidden;
+    border: 1px solid #dddddd77;
+    border-radius: 1px;
+}
+
+/* Slide Image */
+.slide img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Caption */
+.caption {
+    color: #f2f2f2;
+    background-color: rgba(0,0,0,0.5);
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 16px;
+    z-index: 1;
+}
+
+/* Navigation Buttons */
+.nav-button {
+    position: absolute;
+    top: 50%;
+    
+    background-color: transparent;
+    color: white;
+    border: none;
+    padding: 12px;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 18px;
+    transition: background-color 0.3s;
+    -webkit-text-stroke: 1px #ffffff; /* White outline */
+     text-shadow: -1px -1px 0 #ffffff, 1px -1px 1 #ffffff, -1px 1px 0 #ffffff, 1px 1px 1 #00ffcc;
+     -webkit-text-stroke: 1px #000000; /* black outline */
+     text-shadow: -1px -1px 1 #00ffcc, 1px -1px 0 #000000, -1px 1px 1 #000000, 1px 1px 0 #000000;
+}
+
+.nav-button:hover {
+    background-color: rgba(0,0,0,0.33);
+}
+
+.prev {
+    left: 15px;
+}
+
+.next {
+    right: 15px;
+}
+
+/* Sorting Controls */
+.sorting-controls {
+   /* max-width: 468px;*/
+    margin: 32px auto;
+    text-align: center;
+}
+
+.sorting-controls label {
+    margin-right: 10px;
+    font-size: 10px;
+      font-weight: 100;
+}
+
+select, option {
+  width: 100%;
+  border: 1px solid #333f33;
+  border-radius: 0.25em;
+  padding: 0.25em 0.5em;
+  font-size: 0.77rem;
+  font-weight: 200;
+  color:#a0fcfc;
+   font-family: inherit;
+  cursor: pointer;
+  line-height: 1.11;
+  background-color: #efcfef;
+  background: #303330;
+}
+
+/* Responsive Adjustments */ 
+@media (max-width: 600px) {
+    .nav-button {
+        padding: 8px;
+        font-size: 10px;
+    }
+
+    .caption {
+        font-size: 14px;
+        bottom: 10px;
+        left: 10px;
+    }
+
+    .sorting-controls label,
+    .sorting-controls select {
+        font-size: 10px;
+    }
+}
+.griddy {
+  display: grid;
+  grid-template-columns: minmax(0, 50%) 1fr; 
+  grid-template-rows: auto auto; /* Two rows */
+    grid-gap: 32px;
+  gap: 32px; /* Space between grid items */
+  width: 100%;
+  margin:0 auto; /* Center grid */
+  padding: 	32px;
+  text-align: center ;
+  justify-content: center; /* Centers the grid items */
+  align-items: center; /* Centers the grid items */
+  align-items: center;
+  justify-items: center; /* Centers the grid items */
+}
+
+
+#wun {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+#wun img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+#tew {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+#tri {
+  grid-column: 2;
+  grid-row: 1 / 3;
+}
+
+#fwr {
+  grid-column: 1 / -1;
+  grid-row: 3;
+}
+@media (max-width: 1001px) {
+  .griddy {
+    grid-template-columns: 1fr; /* Single column */
+    grid-template-rows: auto; /* Automatically adjust rows */
+  }
+
+  #wun, #tew, #tri, #fwr {
+    grid-column: 1; /* Full width for all items */
+    grid-row: auto; /* Each item stacks vertically */
+  }
+}
+/* General Modal Styles */
+.modal {
+   /* position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); */
+    width: 80%;
+    height: 80%; 
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000; /* Ensure it sits above other elements */
+    overflow: auto; /* Enable scrolling for small displays */
+}
+
+.modal-content {
+    background: #222; /* Medium dark theme */
+    color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 32px;
+   /* max-width: 500px;*/
+    width: 90%;
+    font-family: 'hnm11', sans-serif;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Header Styles */
+.modal-content h2 {
+    font-family: 'ds';
+    font-weight: 200;
+    -webkit-text-stroke: 1px #000000; /* White outline */
+    text-shadow: -3px -2px 0 #a0e600, 1px -1px 0 #000000, -1px 1px 0 #000000, 2px 3px 0 #e60000;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Form Labels */
+.modal-content label {
+    display: block;
+    margin-bottom: 8px;
+    font-family: 'kb', sans-serif;
+    font-size: 16px;
+    color: var(--pupil);
+}
+
+/* Form Inputs */
+.modal-content input[type="text"],
+.modal-content input[type="file"],
+.modal-content textarea {
+    width: 100%;
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--blew);
+    border-radius: 4px;
+    background-color: #333;
+    color: #fff;
+    font-family: 'hnm11', sans-serif;
+}
+
+.modal-content textarea {
+    resize: none;
+}
+
+/* Buttons */
+.modal-content button {
+    padding: 12px 24px;
+    margin-top: 12px;
+    border: none;
+    border-radius: 4px;
+    font-family: 'hnbi4', sans-serif;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.modal-content button.upload {
+    background-color: var(--lima);
+    color: #000;
+}
+
+.modal-content button.upload:hover {
+    background-color: var(--blew);
+}
+
+.modal-content button.cancel {
+    background-color: var(--redd);
+    color: #fff;
+}
+
+.modal-content button.cancel:hover {
+    background-color: #a00;
+}
+
+/* Accent Colors for Elements */
+.modal-content input:focus,
+.modal-content textarea:focus {
+    outline: 2px solid var(--pupil);
+}
+
+/* Close Button */
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #f00;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-button:hover {
+    color: #f00;
+}
+
+/* Optional: Error Message */
+.modal-content .error {
+    font-family: 'hnm11', sans-serif;
+    font-size: 12px;
+    color: var(--redd);
+    margin-top: -8px;
+    margin-bottom: 12px;
+}
+
+/* Optional: Success Message */
+.modal-content .success {
+    font-family: 'hnm11', sans-serif;
+    font-size: 12px;
+    color: var(--lima);
+    margin-top: -8px;
+    margin-bottom: 12px;
+}
+
+/* Upload Status Styling */
+#uploadStatus {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 5px;
+    font-family: 'hnm11', sans-serif;
+    font-size: 14px;
+    text-align: center;
+}
+
+#uploadStatus p {
+    margin: 0;
+    padding: 5px;
+}
+
+#uploadStatus p.success {
+    color: var(--lima);
+    background-color: rgba(176, 238, 0, 0.1);
+    border: 1px solid var(--lima);
+}
+
+#uploadStatus p.error {
+    color: var(--redd);
+    background-color: rgba(255, 43, 19, 0.1);
+    border: 1px solid var(--redd);
+}
+
+/* Card Sizing Adjustments */
+div .card {
+    min-width: 40%;
+    max-width: 96%;
+    margin: 0 auto; /* Added for better centering */
+}
+
+/* Admin Grid Layout */
+.griddy-admin {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr)); /* Better column handling */
+    gap: 32px;
+      grid-gap: 32px;
+    width: 96%;
+    margin: 0 auto;
+    padding: 0 var(--padding-medium); /* Added lateral padding */
+}
+
+.blog-content {
+    grid-column: 1;
+    width: 96%;
+    overflow: auto; 
+
+.admin-panel {
+    grid-column: 2;
+    width: 96%;
+    position: relative; 
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .griddy-admin {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding: 0 var(--padding-small); /* Adjusted padding */
+    }
+
+    .admin-panel .video-container {
+        width: calc(100% + 2 * var(--padding-medium)); /* Match global style */
+        margin: 0 calc(-1 * var(--padding-medium));
+    }
+}
+
+/* Video Container Fixes */
+.video-container {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    width: 100vw;
+    max-width: calc(100% + 2 * var(--padding-medium));
+    margin: 1rem calc(-1 * var(--padding-medium));
+    left: 50%;
+    transform: translateX(-50%);
+    transition: margin 0.3s ease;
+    box-sizing: content-box; /* Prevent padding issues */
+}
+
+/* Z-index Management */
+#admin-controls {
+    z-index: 1000; /* Ensure this is highest in context */
+}
+
+.ql-editor {
+    z-index: 1 !important; /* Force editor below controls */
+}
+
+/* ===== Critical Fixes ===== */
+.ql-editor {
+  overflow: visible !important;
+  z-index: 1;
+}
+
+.admin-button {
+  padding: 2px;
+  width: auto;
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+
+.admin-button:hover {
+  opacity: 1;
+}
+
+.featured-heading {
+  font-family: var(--font-secondary);
+  margin-bottom: var(--padding-small);
+  -webkit-text-stroke: 1px black;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+  color: var(--blew);
+  scale: 0.69;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 80%;
+  height: 80%;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  position: relative;
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 96%;
+/*  max-width: 800px;*/
+}
+
+.close-button {
+  position: absolute;
+  right: 1rem;
+  top: 0.5rem;
+  cursor: pointer;
+  font-size: 2.4rem;
+  line-height: 1;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+/* ===== Mobile Optimization ===== */
+@media (max-width: 768px) {
+  #editor-container, 
+  #featured-editr {
+    height: 250px !important;
+  }
+
+  .ql-toolbar {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px !important;
+  }
+
+  .modal-content {
+    padding: 1.5rem;
+  }
+
+  .action-btn {
+    padding: 0.75rem;
+    width: 100%;
+  }
+}
+
+/* ===== Loading States ===== */
+button[disabled] {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.button-text::after {
+  content: '';
+  display: inline-block;
+  width: 0.5em;
+}
+
+.loading-dots::after {
+  content: '.';
+  animation: dots 1.4s infinite steps(4, end);
+}
+
+@keyframes dots {
+  0%, 20% { content: '.'; }
+  40% { content: '..'; }
+  60% { content: '...'; }
+  80%, 100% { content: ''; }
+}
+
+.loading-dots::after {
+  content: '.';
+  animation: dots 1.4s infinite steps(4, end);
+}
+
+@keyframes dots {
+  0%, 20% { content: '.'; }
+  40% { content: '..'; }
+  60% { content: '...'; }
+  80%, 100% { content: ''; }
+}
+
+button[disabled] {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+/* Admin-Specific Styles */
+[data-admin-only] { 
+  display: none !important;
+  opacity: 0.95;
+  transition: opacity 0.2s ease;
+}
+
+.ql-toolbar {
+  background: #fff;
+  border-color: #000 !important;
+}
+
+.ql-editor {
+  font-family: var(--font-main);
+  min-height: 300px;
+  background: #fff;
+}
+
+.modal-content {
+  background: rgba(202, 150, 150, 0.95);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+#admin-controls {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+}
+#wun, #tew, #1 {
+    padding: 0;
+    overflow: hidden;
+    background: #000000;
+    display: flex;
+    align-items: center;
+}
+
+#wun > img, #tew > img, #1 > img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+#tri, #donkey {
+    height: 100%;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (max-width: 1001px) {
+  .grid-container, .griddy {
+    grid-gap: 20px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+  body {
+     padding: 15px;
+     gap: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .grid-container, .griddy {
+    grid-gap: 12px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+  }
+   body {
+     padding: 10px;
+     gap: 15px;
+  }
+   .card {
+       padding: 15px;
+   }
+  #wun, #tew, #1 {
+      padding: 0;
+  }
+}

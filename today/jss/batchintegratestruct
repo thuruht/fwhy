@@ -1,0 +1,948 @@
+Below is a complete dump of the production‐ready code for all files. These files have been adjusted so that the front end (the modal interface) remains exactly as it is for employees, while the Cloudflare Worker’s OCR endpoint now uses Google Cloud Vision. All environment‐specific values (such as the API key and storage URLs) are assumed to be set in your deployment configuration (see the “Deployment Instructions” section at the end).
+File: index.html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flyer Upload</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Admin Upload Modal -->
+  <div id="adminUploadModal" class="modal" style="display:none;">
+    <div class="modal-content" style="padding:20px; max-width:600px; margin:auto; position:relative;">
+      <h2>Staff Flyer Upload</h2>
+      <!-- Password Prompt (visible initially) -->
+      <div id="adminPasswordPrompt">
+        <label for="adminPasswordInput">Staff Password:</label>
+        <input type="password" id="adminPasswordInput" required />
+        <button id="checkPasswordBtn">Check Password</button>
+      </div>
+      <!-- Container for Upload Type Selector and Forms -->
+      <div id="uploadTypeContainer" style="display:none; margin-top:10px; flex-direction: column; gap: 10px; display: flex;">
+        <!-- Upload Type Selector (Radio Buttons) -->
+        Please Do not Select Upload Type until Password Check is Complete. Select again if broken, if still broken refresh page, start over.
+        <div id="uploadTypeSelector">
+          <label>
+            <input type="radio" name="uploadType" value="single" checked> Single Upload
+          </label>
+          <label style="margin-left: 10px;">
+            <input type="radio" name="uploadType" value="batch"> Batch Upload
+          </label>
+        </div>
+        <!-- Container for Upload Forms -->
+        <div id="uploadForms" style="display: flex; flex-direction: column; gap: 10px;">
+          <!-- Single Upload Form (hidden initially) -->
+          <form id="singleUploadForm" action="https://fygw0.kcmo.xyz/upload" method="POST" enctype="multipart/form-data" style="display:none;">
+            <input type="hidden" name="password" id="singleUploadPasswordField" />
+            <label for="singleType">Venue:</label>
+            <select id="singleType" name="type" required>
+              <option value="howdy">Howdy</option>
+              <option value="farewell">Farewell</option>
+            </select>
+            <label for="singleTitle">Event Title:</label>
+            <input type="text" name="title" required />
+            <label for="singleDate">Event Date:</label>
+            <input type="date" name="date" required />
+            <label for="singleTime">Event Time:</label>
+            <input type="text" name="time" placeholder="e.g., 7:00 PM" />
+            <label for="singleDescription">Description:</label>
+            <textarea name="description" required></textarea>
+            <label for="singleFlyerFile">Flyer:</label>
+            <input type="file" name="flyerFile" accept="image/*" required />
+            <button type="submit">Upload Flyer</button>
+          </form>
+          <!-- Batch Upload Form (hidden initially) -->
+          <form id="batchUploadForm" action="https://fygw0.kcmo.xyz/batch-upload" method="POST" enctype="multipart/form-data" style="display:none;">
+            <input type="hidden" name="password" id="batchUploadPasswordField" />
+            <label for="flyerFiles">Select Flyer Images:</label>
+            <input type="file" name="flyerFiles" accept="image/*" multiple required />
+            <!-- Container for dynamically generated preview cards -->
+            <div id="batchPreviewContainer"></div>
+            <button type="submit">Batch Upload</button>
+          </form>
+        </div>
+      </div>
+      <!-- Close Modal Button -->
+      <button id="closeAdminModalBtn" class="close-button" style="position:absolute; top:10px; right:10px; background:#00000033; border:1px solid #00000066; border-radius:25%; padding:0; font-size:1.5rem;">
+        &times;
+      </button>
+    </div>
+  </div>
+  <button id="openAdminModalBtn">Open Upload Modal</button>
+  <script src="modal.js"></script>
+  <script src="batch-upload.js"></script>
+</body>
+</html>
+
+File: modal.js
+
+/* modal.js */
+// @ts-nocheck
+// --- Configuration Constants (Global Scope) ---
+const BASE_URL = 'https://fygw0.kcmo.xyz';  // For general API calls
+const GALLERY_WORKER_URL = 'https://fygw0.kcmo.xyz'; // For OCR/AI endpoints
+
+// --- Modal and Batch Upload Code ---
+const openAdminModalBtn = document.getElementById('openAdminModalBtn');
+const adminUploadModal = document.getElementById('adminUploadModal');
+const closeAdminModalBtn = document.getElementById('closeAdminModalBtn');
+
+const adminPasswordPrompt = document.getElementById('adminPasswordPrompt');
+const adminPasswordInput = document.getElementById('adminPasswordInput');
+const checkPasswordBtn = document.getElementById('checkPasswordBtn');
+const batchUploadForm = document.getElementById('batchUploadForm');
+
+// Show modal when uploader button is clicked.
+if (openAdminModalBtn) {
+  openAdminModalBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    adminUploadModal.style.display = 'flex';
+  });
+}
+
+function closeAdminModal() {
+  adminUploadModal.style.display = 'none';
+  adminPasswordInput.value = '';
+  adminPasswordPrompt.style.display = 'block';
+  batchUploadForm.style.display = 'none';
+}
+if (closeAdminModalBtn) {
+  closeAdminModalBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    closeAdminModal();
+  });
+}
+adminUploadModal.addEventListener('click', (e) => {
+  if (e.target === adminUploadModal) {
+    closeAdminModal();
+  }
+});
+
+if (checkPasswordBtn) {
+  checkPasswordBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const pass = adminPasswordInput.value.trim();
+    if (!pass) {
+      alert("Please enter the staff password!");
+      return;
+    }
+    document.getElementById('singleUploadPasswordField').value = pass;
+    document.getElementById('batchUploadPasswordField').value = pass;
+    adminPasswordPrompt.style.display = 'none';
+    document.getElementById('uploadTypeContainer').style.display = 'flex';
+    // Show default single upload form.
+    singleUploadForm.style.display = 'block';
+    batchUploadForm.style.display = 'none';
+  });
+}
+
+/**
+ * Calls the /ocr endpoint with the file and returns the complete OCR text.
+ */
+async function extractTextFromImage(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  try {
+    const response = await fetch(`${GALLERY_WORKER_URL}/ocr`, {
+      method: 'POST',
+      body: formData,
+    });
+    const result = await response.json();
+    if (result && result.ParsedResults && result.ParsedResults.length > 0) {
+      return result.ParsedResults[0].ParsedText;
+    }
+  } catch (error) {
+    console.error("OCR API error:", error);
+  }
+  return "";
+}
+
+/**
+ * Calls the /process-ocr endpoint to extract structured event data.
+ */
+async function processOcrText(ocrText) {
+  try {
+    const response = await fetch(`${GALLERY_WORKER_URL}/process-ocr`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ocrText }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Process OCR error:", error);
+    return {};
+  }
+}
+
+let batchUploadItems = [];
+
+/**
+ * Creates preview cards for each selected file in batch mode.
+ * Each card shows an image preview and input fields for event data.
+ * It pre-fills the description with the complete OCR text, then calls /process-ocr
+ * to prefill date, time, and venue if available.
+ */
+function handleBatchFileSelection(event) {
+  const files = event.target.files;
+  const previewContainer = document.getElementById('batchPreviewContainer');
+  previewContainer.innerHTML = "";
+  batchUploadItems = [];
+
+  Array.from(files).forEach((file, index) => {
+    const itemId = index;
+    batchUploadItems.push({ id: itemId, file: file });
+
+    const card = document.createElement('div');
+    card.classList.add('batch-preview');
+    card.dataset.id = itemId;
+    card.style.border = "1px solid #ccc";
+    card.style.margin = "10px";
+    card.style.padding = "10px";
+
+    // Image preview.
+    const img = document.createElement('img');
+    img.style.maxWidth = "100%";
+    img.style.height = "auto";
+    card.appendChild(img);
+    const reader = new FileReader();
+    reader.onload = (e) => { img.src = e.target.result; };
+    reader.readAsDataURL(file);
+
+    // Select field for venue type.
+    const typeSelect = document.createElement('select');
+    typeSelect.classList.add("preview-type");
+    typeSelect.style.display = "block";
+    typeSelect.style.marginTop = "8px";
+    const optionHowdy = document.createElement('option');
+    optionHowdy.value = "howdy";
+    optionHowdy.textContent = "Howdy";
+    const optionFarewell = document.createElement('option');
+    optionFarewell.value = "farewell";
+    optionFarewell.textContent = "Farewell";
+    typeSelect.appendChild(optionHowdy);
+    typeSelect.appendChild(optionFarewell);
+    card.appendChild(typeSelect);
+
+    // Input for event title.
+    const titleInput = document.createElement('input');
+    titleInput.type = "text";
+    titleInput.placeholder = "Event Title";
+    titleInput.classList.add("preview-title");
+    titleInput.style.display = "block";
+    titleInput.style.marginTop = "8px";
+    card.appendChild(titleInput);
+
+    // Input for event date.
+    const dateInput = document.createElement('input');
+    dateInput.type = "date";
+    dateInput.classList.add("preview-date");
+    dateInput.style.display = "block";
+    dateInput.style.marginTop = "8px";
+    card.appendChild(dateInput);
+
+    // Input for event time.
+    const timeInput = document.createElement('input');
+    timeInput.type = "text";
+    timeInput.placeholder = "Event Time (e.g., 7:00 PM)";
+    timeInput.classList.add("preview-time");
+    timeInput.style.display = "block";
+    timeInput.style.marginTop = "8px";
+    card.appendChild(timeInput);
+
+    // Textarea for description.
+    const descTextarea = document.createElement('textarea');
+    descTextarea.placeholder = "Description";
+    descTextarea.classList.add("preview-description");
+    descTextarea.style.display = "block";
+    descTextarea.style.width = "100%";
+    descTextarea.style.marginTop = "8px";
+    card.appendChild(descTextarea);
+
+    previewContainer.appendChild(card);
+
+    // Retrieve full OCR text.
+    extractTextFromImage(file).then((extractedText) => {
+      descTextarea.value = extractedText;
+      processOcrText(extractedText).then((parsed) => {
+        if (parsed.venue) {
+          typeSelect.value = parsed.venue;
+        }
+        if (parsed.date) {
+          dateInput.value = parsed.date;
+        }
+        if (parsed.time) {
+          timeInput.value = parsed.time;
+        }
+      });
+    });
+  });
+}
+
+if (batchUploadForm) {
+  const batchFileInput = batchUploadForm.querySelector('input[name="flyerFiles"]');
+  if (batchFileInput) {
+    batchFileInput.addEventListener('change', handleBatchFileSelection);
+  }
+}
+
+const uploadTypeSelector = document.getElementById('uploadTypeSelector');
+const singleUploadForm = document.getElementById('singleUploadForm');
+if (uploadTypeSelector) {
+  const radioButtons = uploadTypeSelector.querySelectorAll('input[name="uploadType"]');
+  radioButtons.forEach((radio) => {
+    radio.addEventListener('change', () => {
+      if (radio.value === 'single') {
+        singleUploadForm.style.display = 'block';
+        batchUploadForm.style.display = 'none';
+      } else if (radio.value === 'batch') {
+        singleUploadForm.style.display = 'none';
+        batchUploadForm.style.display = 'block';
+      }
+    });
+  });
+}
+
+if (batchUploadForm) {
+  batchUploadForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    const password = document.getElementById('batchUploadPasswordField').value;
+    formData.append('password', password);
+
+    batchUploadItems.forEach((item, index) => {
+      const card = document.querySelector(`.batch-preview[data-id="${item.id}"]`);
+      if (!card) return;
+      const title = card.querySelector('.preview-title').value;
+      const date = card.querySelector('.preview-date').value;
+      const time = card.querySelector('.preview-time').value;
+      const description = card.querySelector('.preview-description').value;
+      const type = card.querySelector('.preview-type').value;
+      formData.append(`flyerFiles[${index}]`, item.file);
+      formData.append(`titles[${index}]`, title);
+      formData.append(`dates[${index}]`, date);
+      formData.append(`times[${index}]`, time);
+      formData.append(`descriptions[${index}]`, description);
+      formData.append(`types[${index}]`, type);
+    });
+
+    try {
+      const response = await fetch(batchUploadForm.action, {
+        method: 'POST',
+        body: formData,
+      });
+      const result = await response.json();
+      if (response.ok && result.success) {
+        alert('Batch upload successful!');
+        batchUploadForm.reset();
+        document.getElementById('batchPreviewContainer').innerHTML = "";
+      } else {
+        alert(`Batch upload failed: ${result.message || 'Unknown error.'}`);
+      }
+    } catch (error) {
+      console.error('Batch upload failed:', error);
+      alert(`Batch upload error: ${error.message}`);
+    }
+  });
+}
+
+File: batch-upload.js
+
+document.addEventListener('DOMContentLoaded', () => {
+  const batchUploadForm = document.getElementById('batchUploadForm');
+  const fileInput = document.getElementById('flyerFiles');
+  const previewContainer = document.getElementById('batchPreviewContainer');
+  const GALLERY_WORKER_URL = 'https://fygw0.kcmo.xyz';
+
+  let batchUploadItems = [];
+
+  fileInput.addEventListener('change', handleBatchFileSelection);
+
+  function handleBatchFileSelection(event) {
+    const files = event.target.files;
+    previewContainer.innerHTML = "";
+    batchUploadItems = [];
+
+    Array.from(files).forEach((file, index) => {
+      const itemId = index;
+      batchUploadItems.push({ id: itemId, file: file });
+
+      const card = document.createElement('div');
+      card.classList.add('batch-preview');
+      card.dataset.id = itemId;
+      card.style.border = "1px solid #ccc";
+      card.style.margin = "10px";
+      card.style.padding = "10px";
+
+      // Image preview
+      const img = document.createElement('img');
+      img.style.maxWidth = "100%";
+      img.style.height = "auto";
+      card.appendChild(img);
+      const reader = new FileReader();
+      reader.onload = (e) => { img.src = e.target.result; };
+      reader.readAsDataURL(file);
+
+      // Venue selector
+      const venueLabel = document.createElement('label');
+      venueLabel.textContent = "Venue:";
+      card.appendChild(venueLabel);
+      const venueSelect = document.createElement('select');
+      venueSelect.classList.add("preview-type");
+      venueSelect.style.display = "block";
+      venueSelect.style.marginTop = "8px";
+      venueSelect.innerHTML = `<option value="howdy">Howdy</option><option value="farewell">Farewell</option>`;
+      card.appendChild(venueSelect);
+
+      // Event title
+      const titleInput = document.createElement('input');
+      titleInput.type = "text";
+      titleInput.placeholder = "Event Title";
+      titleInput.classList.add("preview-title");
+      titleInput.style.display = "block";
+      titleInput.style.marginTop = "8px";
+      card.appendChild(titleInput);
+
+      // Event date
+      const dateInput = document.createElement('input');
+      dateInput.type = "date";
+      dateInput.classList.add("preview-date");
+      dateInput.style.display = "block";
+      dateInput.style.marginTop = "8px";
+      card.appendChild(dateInput);
+
+      // Event time
+      const timeInput = document.createElement('input');
+      timeInput.type = "text";
+      timeInput.placeholder = "Event Time (e.g., 7:00 PM)";
+      timeInput.classList.add("preview-time");
+      timeInput.style.display = "block";
+      timeInput.style.marginTop = "8px";
+      card.appendChild(timeInput);
+
+      // Description textarea
+      const descTextarea = document.createElement('textarea');
+      descTextarea.placeholder = "Description";
+      descTextarea.classList.add("preview-description");
+      descTextarea.style.display = "block";
+      descTextarea.style.width = "100%";
+      descTextarea.style.marginTop = "8px";
+      card.appendChild(descTextarea);
+
+      previewContainer.appendChild(card);
+
+      // Call /ocr to get full OCR text and prefill description.
+      extractTextFromImage(file).then((extractedText) => {
+        descTextarea.value = extractedText;
+        processOcrText(extractedText).then((parsed) => {
+          if (parsed.venue) venueSelect.value = parsed.venue;
+          if (parsed.date) dateInput.value = parsed.date;
+          if (parsed.time) timeInput.value = parsed.time;
+        });
+      });
+    });
+  }
+
+  async function extractTextFromImage(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const response = await fetch(`${GALLERY_WORKER_URL}/ocr`, {
+        method: 'POST',
+        body: formData,
+      });
+      const result = await response.json();
+      if (result && result.ParsedResults && result.ParsedResults.length > 0) {
+        return result.ParsedResults[0].ParsedText;
+      }
+    } catch (error) {
+      console.error("OCR API error:", error);
+    }
+    return "";
+  }
+
+  async function processOcrText(ocrText) {
+    try {
+      const response = await fetch(`${GALLERY_WORKER_URL}/process-ocr`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ocrText }),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error("Process OCR error:", error);
+      return {};
+    }
+  }
+
+  batchUploadForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const uploadData = new FormData();
+    const password = document.getElementById('batchUploadPasswordField').value;
+    uploadData.append('password', password);
+
+    batchUploadItems.forEach((item, index) => {
+      const card = document.querySelector(`.batch-preview[data-id="${item.id}"]`);
+      if (!card) return;
+      const title = card.querySelector('.preview-title').value;
+      const date = card.querySelector('.preview-date').value;
+      const time = card.querySelector('.preview-time').value;
+      const description = card.querySelector('.preview-description').value;
+      const venue = card.querySelector('.preview-type').value;
+      uploadData.append(`flyerFiles[${index}]`, item.file);
+      uploadData.append(`titles[${index}]`, title);
+      uploadData.append(`dates[${index}]`, date);
+      uploadData.append(`times[${index}]`, time);
+      uploadData.append(`descriptions[${index}]`, description);
+      uploadData.append(`types[${index}]`, venue);
+    });
+
+    try {
+      const response = await fetch(batchUploadForm.action, {
+        method: 'POST',
+        body: uploadData,
+      });
+      const result = await response.json();
+      if (response.ok && result.success) {
+        alert('Batch upload successful!');
+        batchUploadForm.reset();
+        previewContainer.innerHTML = "";
+      } else {
+        alert(`Batch upload failed: ${result.message || 'Unknown error.'}`);
+      }
+    } catch (error) {
+      console.error('Batch upload failed:', error);
+      alert(`Batch upload error: ${error.message}`);
+    }
+  });
+});
+
+File: gallery-worker.js
+
+(This is the Cloudflare Worker script that handles uploads, OCR, and listing.)
+
+/* gallery-worker.js */
+export default {
+  async fetch(request, env) {
+    try {
+      // Immediately handle preflight OPTIONS requests.
+      if (request.method === 'OPTIONS') {
+        return new Response(null, {
+          status: 204,
+          headers: {
+            "Access-Control-Allow-Origin": getAllowedOrigin(request),
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization"
+          },
+        });
+      }
+      
+      const url = new URL(request.url);
+      const { pathname, searchParams } = url;
+      
+      if (pathname === '/upload' && request.method === 'POST') {
+        return await handleUpload(request, env);
+      } else if (pathname === '/batch-upload' && request.method === 'POST') {
+        return await handleBatchUpload(request, env);
+      } else if (pathname === '/ocr' && request.method === 'POST') {
+        return await handleOcr(request, env);
+      } else if (pathname === '/process-ocr' && request.method === 'POST') {
+        return await handleProcessOcr(request, env);
+      } else if (pathname.startsWith('/list/howdy') && request.method === 'GET') {
+        return await handleList(request, env, 'howdy');
+      } else if (pathname.startsWith('/list/farewell') && request.method === 'GET') {
+        return await handleList(request, env, 'farewell');
+      } else if (pathname.startsWith('/archives') && request.method === 'GET') {
+        const type = searchParams.get('type') || 'howdy';
+        return await handleArchives(request, env, type);
+      } else {
+        return createCorsResponse({ message: 'Not Found' }, 404, request);
+      }
+    } catch (err) {
+      console.error(err);
+      return createCorsResponse({ message: 'Internal Server Error' }, 500, request);
+    }
+  },
+};
+
+function getAllowedOrigin(request) {
+  const allowedOrigins = ["https://fwhy.kcmo.xyz", "https://farewellcafe.com"];
+  const requestOrigin = request.headers.get("Origin");
+  if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
+    return requestOrigin;
+  }
+  return allowedOrigins[0];
+}
+
+function createCorsResponse(body, status = 200, request) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      "Access-Control-Allow-Origin": getAllowedOrigin(request),
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      "Content-Type": "application/json",
+    },
+  });
+}
+
+/**
+ * Handle POST /upload endpoint (Single Upload)
+ */
+async function handleUpload(request, env) {
+  const formData = await request.formData();
+  const password = formData.get("password");
+  if (password !== env.UPLOAD_PASSWORD) {
+    return createCorsResponse({ message: "Unauthorized: Invalid password." }, 401, request);
+  }
+  const type = formData.get("type");
+  const title = formData.get("title");
+  const date = formData.get("date");
+  const time = formData.get("time") || "";
+  const description = formData.get("description") || "";
+  const file = formData.get("flyerFile");
+
+  if (!type || !["howdy", "farewell"].includes(type)) {
+    return createCorsResponse({ message: 'Invalid type. Must be "howdy" or "farewell".' }, 400, request);
+  }
+  if (!title || !date || !file) {
+    return createCorsResponse({ message: "Missing required fields: type, title, date, flyerFile." }, 400, request);
+  }
+  const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+  if (!allowedTypes.includes(file.type)) {
+    return createCorsResponse({ message: "Unsupported file type. Allowed types: JPEG, PNG, GIF, WEBP." }, 400, request);
+  }
+  const MAX_SIZE = 5 * 1024 * 1024;
+  if (file.size > MAX_SIZE) {
+    return createCorsResponse({ message: "File size exceeds the 5MB limit." }, 400, request);
+  }
+  const flyerId = crypto.randomUUID();
+  const extension = getExtensionFromMime(file.type);
+  const objectKey = `${type}/${flyerId}.${extension}`;
+
+  try {
+    await env.f3b.put(objectKey, file.stream(), { httpMetadata: { contentType: file.type } });
+  } catch (error) {
+    console.error("Error storing image in R2:", error);
+    return createCorsResponse({ message: "Failed to store image." }, 500, request);
+  }
+  const imageUrl = `${env.PUBLIC_R2_URL}/${objectKey}`;
+  const insertSQL = `
+    INSERT INTO flyers (id, type, title, description, date, time, imageUrl)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `;
+  try {
+    await env.fyg3.prepare(insertSQL)
+      .bind(flyerId, type, title, description, date, time, imageUrl)
+      .run();
+  } catch (error) {
+    console.error("Error inserting metadata into D1:", error);
+    await env.f3b.delete(objectKey);
+    return createCorsResponse({ message: "Failed to store flyer metadata." }, 500, request);
+  }
+  return createCorsResponse({ success: true, flyerId, imageUrl }, 201, request);
+}
+
+/**
+ * Handle POST /batch-upload endpoint.
+ */
+async function handleBatchUpload(request, env) {
+  try {
+    const formData = await request.formData();
+    const password = formData.get("password");
+    if (password !== env.UPLOAD_PASSWORD) {
+      return createCorsResponse({ message: "Unauthorized: Invalid password." }, 401, request);
+    }
+    const files = formData.getAll("flyerFiles");
+    const titles = formData.getAll("titles");
+    const dates = formData.getAll("dates");
+    const times = formData.getAll("times");
+    const descriptions = formData.getAll("descriptions");
+    const types = formData.getAll("types");
+    const count = files.length;
+    if (
+      titles.length !== count ||
+      dates.length !== count ||
+      times.length !== count ||
+      descriptions.length !== count ||
+      types.length !== count
+    ) {
+      return createCorsResponse({ message: "Mismatch in number of files and metadata fields." }, 400, request);
+    }
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    const MAX_SIZE = 5 * 1024 * 1024;
+    let results = [];
+    for (let i = 0; i < count; i++) {
+      const file = files[i];
+      const title = titles[i];
+      const date = dates[i];
+      const time = times[i] || "";
+      const description = descriptions[i] || "";
+      const type = types[i];
+      if (!type || !["howdy", "farewell"].includes(type)) {
+        results.push({ index: i, success: false, message: "Invalid type" });
+        continue;
+      }
+      if (!title || !date || !file) {
+        results.push({ index: i, success: false, message: "Missing required fields" });
+        continue;
+      }
+      if (!allowedTypes.includes(file.type)) {
+        results.push({ index: i, success: false, message: "Unsupported file type" });
+        continue;
+      }
+      if (file.size > MAX_SIZE) {
+        results.push({ index: i, success: false, message: "File size exceeds limit" });
+        continue;
+      }
+      const flyerId = crypto.randomUUID();
+      const extension = getExtensionFromMime(file.type);
+      const objectKey = `${type}/${flyerId}.${extension}`;
+      try {
+        await env.f3b.put(objectKey, file.stream(), { httpMetadata: { contentType: file.type } });
+      } catch (err) {
+        results.push({ index: i, success: false, message: "Error storing image in R2" });
+        continue;
+      }
+      const imageUrl = `${env.PUBLIC_R2_URL}/${objectKey}`;
+      const insertSQL = `
+        INSERT INTO flyers (id, type, title, description, date, time, imageUrl)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `;
+      try {
+        await env.fyg3.prepare(insertSQL)
+          .bind(flyerId, type, title, description, date, time, imageUrl)
+          .run();
+        results.push({ index: i, success: true, flyerId, imageUrl });
+      } catch (err) {
+        await env.f3b.delete(objectKey);
+        results.push({ index: i, success: false, message: "Error inserting metadata" });
+      }
+    }
+    return createCorsResponse({ success: true, results }, 201, request);
+  } catch (error) {
+    console.error("Batch upload error:", error);
+    return createCorsResponse({ message: "Batch upload failed" }, 500, request);
+  }
+}
+
+/**
+ * Handle POST /ocr endpoint using Google Cloud Vision.
+ * Accepts multipart/form-data with a "file" field.
+ */
+async function handleOcr(request, env) {
+  try {
+    const formData = await request.formData();
+    const file = formData.get("file");
+    if (!file) {
+      return createCorsResponse({ message: "No file provided" }, 400, request);
+    }
+    
+    // Convert file to an ArrayBuffer, then to a base64 string.
+    const arrayBuffer = await file.arrayBuffer();
+    const base64Image = arrayBufferToBase64(arrayBuffer);
+    
+    // Prepare the Google Cloud Vision API payload.
+    const payload = {
+      requests: [
+        {
+          image: { content: base64Image },
+          features: [
+            { type: "DOCUMENT_TEXT_DETECTION" }
+          ]
+        }
+      ]
+    };
+    
+    // Call the Google Cloud Vision API.
+    const visionResponse = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${env.OCR_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    
+    const visionResult = await visionResponse.json();
+    
+    // Extract the recognized text.
+    let parsedText = "";
+    if (
+      visionResult.responses &&
+      visionResult.responses[0] &&
+      visionResult.responses[0].textAnnotations &&
+      visionResult.responses[0].textAnnotations.length > 0
+    ) {
+      parsedText = visionResult.responses[0].textAnnotations[0].description;
+    }
+    
+    // Wrap the response to mimic OCR.space structure.
+    const result = {
+      ParsedResults: [
+        { ParsedText: parsedText }
+      ]
+    };
+    
+    return createCorsResponse(result, 200, request);
+  } catch (error) {
+    console.error("OCR error:", error);
+    return createCorsResponse({ message: "OCR failed" }, 500, request);
+  }
+}
+
+function arrayBufferToBase64(buffer) {
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+/**
+ * Handle POST /process-ocr endpoint.
+ */
+async function handleProcessOcr(request, env) {
+  try {
+    const { ocrText } = await request.json();
+    if (!ocrText) {
+      return createCorsResponse({ message: "No OCR text provided." }, 400, request);
+    }
+    const extractedData = extractEventData(ocrText);
+    return createCorsResponse(extractedData, 200, request);
+  } catch (error) {
+    console.error("Error in handleProcessOcr:", error);
+    return createCorsResponse({ message: "Failed to process OCR text." }, 500, request);
+  }
+}
+
+/**
+ * Programmatically extract event data from the OCR text.
+ */
+function extractEventData(ocrText) {
+  const data = {
+    description: ocrText,
+    time: "Doors 7PM, 8PM Start",
+    date: "",
+    venue: ""
+  };
+
+  // Extract Date.
+  const dateRegex = /(\d{1,2}\s+[A-Z]+\s*,?\s*\d{4})/i;
+  const dateMatch = ocrText.match(dateRegex);
+  if (dateMatch) {
+    data.date = dateMatch[1].trim();
+  } else if (ocrText.includes("2025")) {
+    data.date = "2025";
+  }
+
+  // Determine Venue.
+  const lowerText = ocrText.toLowerCase();
+  if (
+    lowerText.includes("howdy") ||
+    lowerText.includes("6523 stadium drive") ||
+    lowerText.includes("all ages")
+  ) {
+    data.venue = "howdy";
+  } else if (
+    lowerText.includes("21+") ||
+    lowerText.includes("farewell") ||
+    lowerText.includes("6515 stadium drive")
+  ) {
+    data.venue = "farewell";
+  } else {
+    data.venue = "";
+  }
+
+  return data;
+}
+
+/**
+ * Handle GET /list/{type} endpoint (Upcoming Flyers).
+ */
+async function handleList(request, env, flyerType) {
+  const today = new Date().toISOString().slice(0, 10);
+  const sql = `
+    SELECT * 
+    FROM flyers
+    WHERE type = ? AND date >= ?
+    ORDER BY date ASC
+  `;
+  try {
+    const { results } = await env.fyg3.prepare(sql).bind(flyerType, today).all();
+    return createCorsResponse(results, 200, request);
+  } catch (error) {
+    console.error("Error fetching flyers from D1:", error);
+    return createCorsResponse({ message: "Failed to fetch flyers." }, 500, request);
+  }
+}
+
+/**
+ * Handle GET /archives?type={type} endpoint (Past Flyers).
+ */
+async function handleArchives(request, env, flyerType) {
+  const today = new Date().toISOString().slice(0, 10);
+  const sql = `
+    SELECT * 
+    FROM flyers
+    WHERE type = ? AND date < ?
+    ORDER BY date DESC
+  `;
+  try {
+    const { results } = await env.fyg3.prepare(sql).bind(flyerType, today).all();
+    return createCorsResponse(results, 200, request);
+  } catch (error) {
+    console.error("Error fetching archives from D1:", error);
+    return createCorsResponse({ message: "Failed to fetch archives." }, 500, request);
+  }
+}
+
+function getExtensionFromMime(mime) {
+  const map = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/gif": "gif",
+    "image/webp": "webp",
+  };
+  return map[mime] || "png";
+}
+
+Deployment Instructions
+
+    Environment Variables
+    In your Cloudflare Worker settings, ensure you define the following variables:
+        UPLOAD_PASSWORD – the password employees use.
+        PUBLIC_R2_URL – the public URL for your Cloudflare R2 bucket.
+        OCR_API_KEY – your Google Cloud Vision API key (this replaces your old OCR.space key).
+        f3b – the binding for your Cloudflare R2 bucket.
+        fyg3 – the binding for your database (D1 or equivalent).
+
+    File Structure
+    Deploy the files with the following structure:
+
+    / (root)
+      ├── index.html
+      ├── modal.js
+      ├── batch-upload.js
+      ├── styles.css           (if applicable)
+      └── gallery-worker.js    (Cloudflare Worker script)
+
+    Worker Deployment
+    Upload and deploy the gallery-worker.js script using your Cloudflare dashboard or the Wrangler CLI. Ensure that the proper bindings (R2, D1, and environment variables) are configured in your project.
+
+    Front-End Hosting
+    Host your index.html, modal.js, batch-upload.js, and any associated stylesheets on your website. The URLs in the forms (e.g. the action attribute on the upload forms) point to your deployed Cloudflare Worker endpoints (e.g. https://fygw0.kcmo.xyz/upload).
+
+    Testing
+        Test the single and batch upload flows by logging in as staff.
+        Verify that the /ocr endpoint returns a JSON object with a ParsedResults array containing the recognized text.
+        Confirm that each uploaded flyer is stored in the correct folder (either “howdy” or “farewell”) and that a corresponding database record is created.
+        Check that the public endpoints (e.g. /list/howdy) return the new records so that they appear in the gallery slideshow immediately.
+
+    Logging and Monitoring
+    Monitor your Cloudflare Worker logs after deployment to verify that file uploads, OCR calls, and database insertions are working without error.
+
+By deploying these exact files and following the instructions above, your updated system will use Google Cloud Vision for OCR without disrupting the existing gallery rotation or the staff’s familiar upload interface.
+
+

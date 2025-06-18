@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farewell Cafe KC Menu</title>
+   <style>
+    @font-face {
+        font-family: 'db';
+        src: url('../fnt/db.woff2') format('woff2');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+    }
+    
+    @font-face {
+        font-family: 'ds';
+        src: url('../fnt/ds.woff2') format('woff2');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+    }
+    
+    @font-face {
+        font-family: 'hnm11';
+        src: url('../fnt/hnm11.woff2') format('woff2');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+    }
+    
+    @font-face {
+        font-family: 'hnbi4';
+        src: url('../fnt/hnbi4.woff2') format('woff2');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+    }
+    
+    @font-face {
+        font-family: 'hnb2';
+        src: url('../fnt/hnb2.woff2') format('woff2');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+    }
+
+    body {
+        background-color: #f0fffc;
+        background-image: url('../img/bg8.png');
+        font-family: 'hnm11', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+        line-height: 1.4;
+    }
+    
+    .menu-container {
+        display: flex;
+        max-width: 1400px;
+        margin: 0 auto;
+        gap: 30px;
+        align-items: flex-start;
+    }
+    
+    .menu-column {
+        flex: 1;
+        min-width: 0;
+        background-color: #f0fffc; 
+        border: 2px solid #333;
+        border-radius:8px;
+        margin-top:33px;
+        padding: 20px;      
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .menu-header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .menu-header img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+    }
+    
+    .cocktail-section h2 {
+        font-family: 'db', 'Impact', 'Arial Black', sans-serif;
+        font-weight: normal;
+        font-size: 1.8rem;
+        text-transform: uppercase;
+        margin: 17px 0 8px;
+        border-bottom: 2px solid #333;
+        padding-bottom: 3px;
+        letter-spacing: 1px;
+    }
+    
+    .cocktail {
+        margin-bottom: 17px;
+    }
+    
+    .cocktail-name {
+        font-family: 'ds', 'Impact', 'Arial Black', sans-serif;
+        font-weight: normal;
+        font-size: 2rem;
+        margin-bottom: 2px;
+        color: #6a2b00;
+        letter-spacing:0.069rem;
+    }
+    
+    .cocktail-details {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+    }
+    
+    .cocktail-ingredients {
+        font-family: 'hnm11', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+        font-weight: normal;
+        font-size: 1rem;
+        line-height: 1.4;
+        color: #444;
+        flex-grow: 1;
+        position: relative;
+        padding-right: 10px;
+    }
+    
+    .cocktail-ingredients:after {
+        content: "";
+        position: absolute;
+        bottom: 2px;
+        left: 0;
+        right: 10px;
+        height: 2px;
+        border-bottom: 2px dotted #999;
+    }
+    
+    .cocktail-price {
+        font-family: 'hnbi4', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+        font-weight: bold;
+        font-size: 1.48rem;
+        color: #222;
+        background-color: #f0fffc;
+        padding-left: 5px;
+    }
+    
+    .divider {
+        border-top: 2px solid #333;
+        margin: 18px 0;
+    }
+    
+    .footer {
+        text-align: center;
+        font-family: 'hnbi4', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+        font-weight: bold;
+        letter-spacing: 0.06rem;
+        font-size: 2rem;
+        margin-top: 13px;
+        padding-top: 15px;
+    }
+    
+    .beer-bottle-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin-top: 13px;
+    }
+    
+    .beer-bottle {
+        height: 128px;
+        width: auto;
+    }
+    
+    .beer-columns {
+        display: flex;
+        gap: 20px;
+    }
+    
+    .beer-column {
+        flex: 1;
+    }
+    
+    .beer-columns h1 {
+        font-family: 'db', 'Impact', 'Arial Black', sans-serif;
+        font-weight: normal;
+        font-size: 1.8rem;
+        text-transform: uppercase;
+        margin: 13px 0 8px;
+        border-bottom: 2px solid #333;
+        padding-bottom: 3px;
+    }
+    
+    .menu-section {
+        margin-bottom: 18px;
+    }
+    
+    .beer-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 4px;
+        font-family: 'hnm11', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+        font-size: 1.22rem;
+    }
+    
+    .beer-name {
+        font-family: 'hnm11', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+        font-weight: normal;
+        flex-grow: 1;
+        position: relative;
+        color:#6a003a;
+    }
+    
+    .beer-name:after {
+        content: "";
+        position: absolute;
+        bottom: 2px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        border-bottom: 2px dotted #999;
+    }
+    
+    .beer-price {
+        font-family: 'hnb2', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+        font-weight: normal;
+        background-color: #f0fffc;
+        padding-left: 4px;
+    }
+    
+    .cowboy img {
+        height: auto;
+        width: 180px;
+        margin: 8px auto;
+        display: block;
+    }
+    
+    .cocktail-simple {
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .cocktail-simple .cocktail-name {
+        font-family: 'ds', 'Impact', 'Arial Black', sans-serif;
+        font-weight: normal;
+        font-size: 2rem;
+        color: #6a2b00;
+        letter-spacing: 0.069rem;
+        margin-bottom: 0;
+        position: relative;
+        flex-grow: 1;
+    }
+
+    .cocktail-simple .cocktail-name:after {
+        content: "";
+        position: absolute;
+        bottom: 2px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        border-bottom: 2px dotted #999;
+    }
+    
+    @media (max-width: 768px) {
+        .menu-container {
+            flex-direction: column;
+        }
+        .beer-columns {
+            flex-direction: column;
+            gap: 0;
+        }
+    }
+
+    .footer {
+        margin:0 auto;
+        text-align: center;
+        font-family: 'hnbi4', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+        font-weight: bold;
+        letter-spacing: 0.06rem;
+        font-size: 2rem;
+        width: 100%;
+        max-width:1400px;
+        box-sizing: border-box;
+        margin-top: 24px;
+        padding: 18px 13px;
+        border: 2px solid #333;
+        background-image: linear-gradient(to right, #6a2b00, #6a003a);
+        color: #f0fffc;
+        border-radius:8px;
+    }
+
+    .footer span {
+        color: #f0fffc;
+    }
+
+    .footer .beer-bottle {
+        height: 128px;
+        width: auto;
+    }
+
+    .footer .beer-bottle-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+    }
+</style>
+   
+</head>
+<body>
+    <div class="menu-container">
+        <!-- Cocktail Menu Column -->
+        <div class="menu-column">
+            <div class="menu-header">
+                <img src="ctails.png" alt="Cocktails">
+            </div>
+            
+            <div class="cocktail-section">
+                <div class="cocktail">
+                    <div class="cocktail-name">STRAY DOG</div>
+                    <div class="cocktail-details">
+                        <div class="cocktail-ingredients">Tito's vodka, kahlua, non-dairy milk.</div>
+                        <div class="cocktail-price">$9</div>
+                    </div>
+                </div>
+                
+                <div class="cocktail">
+                    <div class="cocktail-name">CRANSYLVANIA</div>
+                    <div class="cocktail-details">
+                        <div class="cocktail-ingredients">Old grandad bourbon, cranberry juice, lemon juice, maple syrup, sparkling water.</div>
+                        <div class="cocktail-price">$9</div>
+                    </div>
+                </div>
+                
+                <div class="cocktail">
+                    <div class="cocktail-name">RYE & GOSLING</div>
+                    <div class="cocktail-details">
+                        <div class="cocktail-ingredients">Roulette rye, lime juice, ginger beer, aromatic bitters.</div>
+                        <div class="cocktail-price">$7</div>
+                    </div>
+                </div>
+                
+                <div class="cowboy">
+                    <img src="./ohel.png" alt="Cowboy illustration">
+                </div>
+                
+                <div class="cocktail">
+                    <div class="cocktail-name">LEAKY ROOF</div>
+                    <div class="cocktail-details">
+                        <div class="cocktail-ingredients">Farewell's mystery liquor concoction, triple sec, sweet n' sour, cola.</div>
+                        <div class="cocktail-price">$9</div>
+                    </div>
+                </div>
+                
+                <div class="cocktail">
+                    <div class="cocktail-name">YUPPIE SPEEDBALL</div>
+                    <div class="cocktail-details">
+                        <div class="cocktail-ingredients">Jose cuervo blanco tequila, revel berry yerba mate, pear liquor, grenadine.</div>
+                        <div class="cocktail-price">$9</div>
+                    </div>
+                </div>
+                
+                <div class="cocktail-simple">
+                    <div class="cocktail-name">WELL SHOT</div>
+                    <div class="cocktail-price">$4</div>
+                </div>
+                <br>
+                <div class="cocktail-simple">
+                    <div class="cocktail-name">WELL MIX</div>
+                    
+                    <div class="cocktail-price">$5</div>
+                </div>
+                
+                <div class="divider"></div>
+            </div>
+        </div>
+        
+        <!-- Beer Menu Column -->
+        <div class="menu-column">
+            <div class="menu-header">
+                <img src="beerse.png" alt="Beer Menu">
+            </div>
+            
+            <div class="beer-columns">
+                <!-- Left Beer Column -->
+                <div class="beer-column">
+                    <div class="menu-section">
+                        <h1>Domestics</h1>
+                        <div class="beer-item">
+                            <span class="beer-name">Hamm's</span>
+                            <span class="beer-price">$3</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">PBR</span>
+                            <span class="beer-price">$5</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Rolling Rock</span>
+                            <span class="beer-price">$4</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Miller Lite</span>
+                            <span class="beer-price">$5</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Bud Light</span>
+                            <span class="beer-price">$6</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Bud Heavy</span>
+                            <span class="beer-price">$6</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Coors Banquet</span>
+                            <span class="beer-price">$5</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Michelob</span>
+                            <span class="beer-price">$6</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name"><del>Yeungling</del></span>
+                            <span class="beer-price">$5</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Twisted Tea</span>
+                            <span class="beer-price">$5</span>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-section">
+                        <h1>Boulevard</h1>
+                        <div class="beer-item">
+                            <span class="beer-name">Wheat</span>
+                            <span class="beer-price">$5</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Pale Ale</span>
+                            <span class="beer-price">$5</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Tank 7</span>
+                            <span class="beer-price">$7</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Space Camper</span>
+                            <span class="beer-price">$5</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Quirk</span>
+                            <span class="beer-price">$6</span>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-section">
+                        <h1>Seasonal</h1>
+                        <div class="beer-item">
+                            <span class="beer-name">TL Monk & Honey</span>
+                            <span class="beer-price">$6</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Mother's Coffee Stout</span>
+                            <span class="beer-price">$5</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Beer Column -->
+                <div class="beer-column">
+                    <div class="menu-section">
+                        <h1>Craft/Import</h1>
+                        <div class="beer-item">
+                            <span class="beer-name">Modelo</span>
+                            <span class="beer-price">$5</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Victoria</span>
+                            <span class="beer-price">$5</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Guinness</span>
+                            <span class="beer-price">$6</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Stella</span>
+                            <span class="beer-price">$5</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Blue Moon</span>
+                            <span class="beer-price">$6</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Founder's IPA</span>
+                            <span class="beer-price">$5</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Lagunita's IPA</span>
+                            <span class="beer-price">$5</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Sea Quench Sour</span>
+                            <span class="beer-price">$6</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Angry Orchard</span>
+                            <span class="beer-price">$5</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Blake's Ciders</span>
+                            <span class="beer-price">$7</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Stiegl Radler</span>
+                            <span class="beer-price">$8</span>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-section">
+                        <h1>Booze-Free</h1>
+                        <div class="beer-item">
+                            <span class="beer-name">Athletics</span>
+                            <span class="beer-price">$5</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Coors Edge N/A</span>
+                            <span class="beer-price">$4</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Red Bull</span>
+                            <span class="beer-price">$5</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Yerba Mate</span>
+                            <span class="beer-price">$5</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Waterloo</span>
+                            <span class="beer-price">$2</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Coke</span>
+                            <span class="beer-price">$2</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Diet Coke</span>
+                            <span class="beer-price">$2</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Sprite</span>
+                            <span class="beer-price">$2</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Ginger Ale</span>
+                            <span class="beer-price">$2</span>
+                        </div>
+                        <div class="beer-item">
+                            <span class="beer-name">Casamara</span>
+                            <span class="beer-price">$6</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="divider"></div>
+        </div>
+        
+    </div>
+    <div class="footer">
+            <div class="beer-bottle-container">
+                <img src="beerd.png" alt="Beer bottle" class="beer-bottle">
+                <span>WANT A SPECIFIC LIQUOR? LOOK AT THE WALL.</span>
+                <img src="beere.png" alt="Beer bottle" class="beer-bottle">
+            </div>
+        </div>
+    
+    
+   
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>FAREWELL | HOWDY | KCMO - Howdy and Farewell - Kansas City</title>
+    <link rel="icon" type="image/x-icon" href="./img/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./css/ccssss.css">
+    
+    <!-- GSAP and Plugins -->
+    <script src="./jss/gsap-public/minified/gsap.min.js"></script>
+    <script src="./jss/gsap-public/minified/ScrollTrigger.min.js"></script>
+    <script src="./jss/gsap-public/minified/MotionPathPlugin.min.js"></script>
+    <script src="./jss/gsap-public/minified/CustomEase.min.js"></script>
+
+    <!--  Custom JS -->
+      <script defer src="./jss/ifrevl.js"></script>
+    <script defer src="./jss/ansik.js"></script>
+    <!--<script defer src="./jss/modal.js"></script>-->
+    <style>
+      .card {
+        position: relative;
+        display: inline-block; 
+        text-align:center; 
+        align-items:center;
+        align-content:center;
+        justify-content:center;
+        margin: 0 auto;
+    }
+
+    #credEt {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: #1d0202bf;
+        color: #b9b9b9cc;
+        padding: auto;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.5s ease;
+        pointer-events: none;
+        box-shadow: 0 -2px 10px rgba(255, 144, 144, 0.1);
+        -webkit-backdrop-filter: blur(2px);
+        backdrop-filter: blur(2px);
+        max-height: 70vh; 
+        overflow: auto;
+    }
+
+    .card:hover #credEt {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+    }
+
+    #credEt a {
+        color: #00ccaacc;
+        text-decoration: none;
+    }
+     #credEt a:hover {
+        text-decoration: underline;
+    }
+    
+    </style>
+</head>
+
+<body data-state="farewell">
+  <header class="feader" style="min-height:212px;">
+      <div class="contain">
+          <div class="left">
+              <nav>
+                  <ul>
+                      <li><a href="./booking.htm">BOOKING</a></li>
+                      <li><a href="./more.htm">MORE</a></li>
+                      <li><a href="./about.htm">ABOUT</a></li>
+                  </ul>
+              </nav>
+          </div>
+          <div class="right">
+              <h1 class="header-title">
+                  <span class="span2">FAREWELL</span>
+                  <span class="sulk drop-wiggle"> & HOWDY &nbsp;<span id="swico"><img src="./img/swap.png" class="insect flipp cocoon" alt="click-drag"></span></span>
+              </h1>
+          </div>
+      </div>
+
+
+  </header>
+
+  <main class="grid-container">
+     <!-- Calendar -->
+  <div class="card" id="calendar"> 
+      <img src="./img/fwcal.png" class="cally" alt="events calendar">
+      <div id="credEt" class="dynamic-calendar-links"><hr>
+      <p><small>
+        calendar graphic (and the other swell graphics and general layout of this site) designed by the excellent <a href="https://austinchapmandesign.com/" target="_blank" rel="noopener">austin chapman</a> - however, any parts of the site that you dislike, that are animated annoyingly, bitcrushed, badly implemented, or the like, may instead be blamed on me (<a href="https://ntapkc.com" target="_blank" rel="noopener">jojo</a>), with the exception of show/event flyers, which are variously sourced</small></p>
+        <hr> || <a href="#" class="open-popup">view show listings</a> || <a href="#">get .ics file</a> || <a href="#" target="_blank">view google calendar</a> ||<hr>
+      </div>
+  </div>
+
+<!-- Newsletter Card -->
+<div class="card" id="newsletter">
+  <section style="width:100%;">
+      <h2>NEWSLETTER</h2>
+      <h3>Sign up or miss out!</h3>
+      <img src="./img/fwm.png" alt="mascot" class="nicic flipp squi-rmbreth">
+
+      <hr style="color: transparent; padding:24px; border: 0px transparent;">
+
+
+      <!-- Mailchimp Form Container -->
+      <div id="mc_embed_shell" style="width:100%; max-width:468px; margin:0 auto; padding:0; background:transparent;">
+          <div id="mc_embed_signup" style="background:transparent; padding:0;">
+              <form action="https://instagram.us21.list-manage.com/subscribe/post?u=763aaecd2890c1a8f16573301&amp;id=96d18f70ac&amp;f_id=00829ae6f0" 
+                    method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" 
+                    class="validate" target="_blank" novalidate
+                    style="margin:0; padding:0; width:100%;">
+
+                  <div id="mc_embed_signup_scroll" style="width:100%; padding:0;">
+                      <!-- Email Field -->
+                      <div class="mc-field-group" style="margin-bottom:12px; width:100%;">
+                          <input type="email" name="EMAIL" class="required email" id="mce-EMAIL" 
+                                 style="width:100%; height:35px; padding:10px;
+                                        border:1px solid var(--nav-border-color);
+                                        background:rgba(255,255,255,0.9);
+                                        font-family:var(--font-hnm11); font-size:1rem;"
+                                 placeholder="youremail@fart.com" required>
+                      </div>
+
+                      <!-- Toggle Button -->
+                      <button type="button" id="fieldToggle" 
+                              style="width:100%; height:28px; margin:8px 0; padding:4px;
+                                     background:#ffffff22; border:1px dashed var(--nav-border-color);
+                                     cursor:pointer; font-family:var(--font-hnbi4);
+                                     letter-spacing:0.05em;">
+                          ▼ More ▼
+                      </button>
+
+                      <!-- Additional Fields -->
+                      <div id="optionalFields" style="max-height:0; overflow:hidden; transition:max-height 0.3s ease-out;">
+                          <div class="mc-field-group" style="margin-bottom:12px; width:100%;">
+                              <input type="text" name="FNAME" class="required text" id="mce-FNAME" 
+                                     style="width:100%; height:35px; padding:10px;
+                                            border:1px solid var(--nav-border-color);
+                                            background:rgba(255,255,255,0.9);
+                                            font-family:var(--font-hnm11); font-size:1rem;"
+                                     placeholder="First Name" required>
+                          </div>
+                          <div class="mc-field-group" style="margin-bottom:12px; width:100%;">
+                              <input type="text" name="LNAME" class="text" id="mce-LNAME" 
+                                     style="width:100%; height:35px; padding:10px;
+                                            border:1px solid var(--nav-border-color);
+                                            background:rgba(255,255,255,0.9);
+                                            font-family:var(--font-hnm11); font-size:1rem;"
+                                     placeholder="Last Name">
+                          </div>
+                      </div>
+
+                      <!-- Mailchimp Response & Submit -->
+                      <div id="mce-responses" class="clear foot" 
+                           style="width:100%; margin:0; padding:0;">
+                          <div class="response" id="mce-error-response" style="display:none;"></div>
+                          <div class="response" id="mce-success-response" style="display:none;"></div>
+                      </div>
+
+                      <div class="clear foot" style="width:100%; margin:0; padding:0;">
+                          <input type="submit" name="subscribe" value="SUBSCRIBE" 
+                                 class="button" 
+                                 style="width:100%; height:35px; margin:12px 0 0 0;
+                                        padding:0; background:var(--button-bg-color);
+                                        border:1px solid var(--nav-border-color);
+                                        color:var(--button-text-color); font-family:var(--font-main);
+                                        cursor:pointer; transition:all var(--transition-speed) ease;">
+                      </div>
+
+                      <!-- Mailchimp Hidden Fields -->
+                      <div style="position:absolute; left:-5000px;" aria-hidden="true">
+                          <input type="text" name="b_763aaecd2890c1a8f16573301_96d18f70ac" tabindex="-1" value="">
+                      </div>
+                  </div>
+              </form>
+          </div>
+      </div>
+
+      <hr style="color:transparent; padding:24px; border:0;">
+  </section>
+
+
+<script>
+document.getElementById('fieldToggle').addEventListener('click', function() {
+  const fields = document.getElementById('optionalFields');
+  fields.style.maxHeight = fields.style.maxHeight === '0px' ? '200px' : '0px';
+  this.style.borderStyle = fields.style.maxHeight === '0px' ? 'dashed' : 'solid';
+  this.textContent = fields.style.maxHeight === '0px' ? '▼ More ▼' : '▲ Less ▲';
+});
+</script>
+<script src="//s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js"></script>
+<script>
+(function($) {
+  window.fnames = new Array(); 
+  window.ftypes = new Array();
+  fnames[0]='EMAIL'; ftypes[0]='email';
+  fnames[1]='FNAME'; ftypes[1]='text';
+  fnames[2]='LNAME'; ftypes[2]='text';
+  fnames[4]='PHONE'; ftypes[4]='phone';
+}(jQuery));
+var $mcj = jQuery.noConflict(true);
+</script>
+</div>
+
+
+      <!-- Contact -->
+     <div class="card" id="contact">
+      <section>
+          <h2>CONTACT</h2>
+          <h3>816•500•4552</h3>
+          <img src="./img/fm.png" alt="Contact Icon" class="flip squi-rmbreth conic">
+      <hr style="color: transparent; padding:24px; border: 0px transparent;">
+          <div class="social-icons">
+            <ul style="text-decoration: none;">
+          <li class="sopc flip squi-rmbreth">
+              <a href="#facebook" class="open-popup">
+                  <img src="./img/fc.png" alt="Facebook" style="width:24px; height: auto;"> Facebook
+              </a>
+          </li>
+          <li class="sopc flipp squi-rmbreth">
+              <a href="#instagram" class="open-popup">
+                  <img src="./img/gi.png" alt="Instagram" style="width:24px; height: auto;"> Instagram
+              </a>
+          </li>
+          <li class="sopc flip squi-rmbreth">
+              <a href="#twitter" class="open-popup">
+                  <img src="./img/xt.png" alt="Twitter" style="width:24px; height: auto;"> Twitter
+              </a>
+          </li>
+  
+          <li class="sopc flipp squi-rmbreth">
+              <a href="#spotify" class="open-popup">
+                  <img src="./img/ps.png" alt="Spotify" style="width:24px; height: auto;"> Spotify
+              </a>
+          </li>
+          <li class="sopc flip squi-rmbreth">
+              <a href="#secret" class="open-popup">
+                  <img src="./img/secret.png" alt="Linktr.ee" style="width:24px; height: auto;"> Linktr.ee
+              </a>
+          </li>
+          <li class="sopc flipp squi-rmbreth">
+              <a href="https://discord.com/invite/WuVCc2Qu3t" class="open-popup">
+                  <img src="./img/dis.png" alt="Discord" style="width:24px; height: auto;"> Discord
+              </a>
+          </li>
+          </div>
+      <hr style="color: transparent; padding:24px; border: 0px transparent;">
+          <img src="./img/fm2.png" alt="Contact Icon" class="conica">
+      <hr style="color: transparent; padding:24px; border: 0px transparent;">
+        </section>
+      </div>        
+
+
+<div class="card" id="event">
+
+<div class="sorting-controls" style="align-items: center; text-align: center; justify-content: space-between;">
+          <label for="sort-select">Sort By:</label>
+          <select id="sort-select">
+              <option value="soonest"><span style="font-family: inherit; font-weight: inherit; font-size: inherit; color: inherit;">Soonest Event</span></option>
+              <option value="past"><span style="font-family: inherit; font-weight: inherit; font-size: inherit; color: inherit;">Past Events</span></option>
+          </select><!--
+                 <span style="opacity: 0.4;">  <a href="#" class="admin-upload-link" ><button type="button" id="openAdminModalBtn">open uploader</button></a></span>
+                 -->
+      </div>
+      <!-- Loading Indicator -->
+
+
+      <!-- Slideshow Container -->
+      <div class="slideshow-container">
+      
+          <div class="slide">
+            <img id="slide-image" src="" alt="Slideshow Image Loading...">
+        
+          </div>
+         
+          <!-- Navigation Buttons -->
+          <button class="nav-button prev" id="prev-button" aria-label="Previous Slide">&#10094;</button>
+          <button class="nav-button next" id="next-button" aria-label="Next Slide">&#10095;</button>
+        
+      </div>
+       <!--<div class="caption"< !-- id="slide-caption"></div>   -->
+       <!-- <span class="material-icons">lightbulb</span> --> <div style="background:#ff000022;"><p><small>
+ The following links will return different results when viewing the site as farewell, or howdy -<br> make sure you see howdy hank if you want those shows, or that moon dude for ones at farewell -<br> if you want the other venue, switch modes first @ top right of the page!</small></p>
+<hr> || <a class="cal-link-listing open-popup" href="#">view show listings</a> ||
+    <a class="cal-link-ics" href="#">get .ics file</a> || 
+    <a class="cal-link-gcal" href="#" target="_blank">view google calendar</a> ||<hr>
+</div>
+
+
+
+  </main>
+<div id="news" style="width:100%;">
+<iframe src="./u/index.html" style="border: 0; width:100%; min-height:40vh;" frameborder="0" onload="onIframeLoad(this)" /></iframe>
+</div>
+  <footer><div>
+      <p id="address">6515 STADIUM DRIVE, KANSAS CITY, MISSOURI</p></div>
+  </footer><div class="main-calendar-links"></div>
+  <script src="./jss/script.js"></script>
+
+
+</body></html>
