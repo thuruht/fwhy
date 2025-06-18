@@ -10,12 +10,13 @@
 - No captions under slideshow images
 - All event/flyer data comes from unified backend API (`/api/events/list` and `/api/events/slideshow`)
 - Fully responsive, modern UI
+- All legacy and new events/flyers are visible (backend merges all sources)
+- Drinks menu and other content can be made editable via admin dashboard (see backend doc)
 
 ### Event Data
 
 - Expects each event to have: `title`, `date`, `time`, `venue`, `imageUrl` (from `thumbnail_url` or `flyer_url`), `description`, `suggestedPrice`, `ticketLink`, `ageRestriction`
 - Modal popup shows all available info, including optional ticket purchase link
-- All legacy and new events/flyers are visible (backend merges all sources)
 
 ### State Switching
 
