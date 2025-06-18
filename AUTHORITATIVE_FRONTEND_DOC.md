@@ -1,78 +1,37 @@
-# Farewell/Howdy Unified Frontend
+# AUTHORITATIVE_FRONTEND_DOC.md
 
-## Overview
+## Unified Farewell/Howdy Frontend
 
-This is the authoritative documentation for the Farewell/Howdy unified frontend. It supersedes all previous frontend docs, plans, and status files. All other frontend documentation files can be archived or deleted.
+### Features
 
----
+- State switching (Farewell/Howdy) with dynamic theming and content
+- Slideshow displays all event flyers for selected venue/state
+- Clicking a flyer opens a modal with full event info (title, date, time, venue, price, age restriction, description, ticket link)
+- No captions under slideshow images
+- All event/flyer data comes from unified backend API (`/api/events/list` and `/api/events/slideshow`)
+- Fully responsive, modern UI
 
-## Features
+### Event Data
 
-- Modern, unified public site for Farewell and Howdy
-- Robust state switching ("farewell"/"howdy")
-- Unified event calendar and per-venue slideshows
-- Dynamic blog/news integration (with Quill editor on admin)
-- Responsive, accessible, and mobile-friendly design
-- API-driven: all data from unified backend endpoints
+- Expects each event to have: `title`, `date`, `time`, `venue`, `imageUrl` (from `thumbnail_url` or `flyer_url`), `description`, `suggestedPrice`, `ticketLink`, `ageRestriction`
+- Modal popup shows all available info, including optional ticket purchase link
+- All legacy and new events/flyers are visible (backend merges all sources)
 
----
+### State Switching
 
-## Directory Structure
+- User can toggle between Farewell and Howdy; all content, images, and events update accordingly
 
-- `index.html` — Main entry point
-- `css/ccssss.css` — Main stylesheet
-- `jss/script.js` — Main JS (state switching, API, slideshows)
-- `img/` — Images, flyers, assets
-- `fnt/` — Fonts
-- `menu/` — Menu page and assets
-- `u/` — News/blog frontend
-- `about.htm`, `booking.htm`, `howdy.htm`, `more.htm` — Subpages
+### Interoperability
 
----
+- Fully compatible with the new backend (fwhyadmin)
+- All legacy event data from the old worker is preserved and visible
+- No dependency on old endpoints, but backend can still import from them if needed
 
-## API Usage
+### Deployment
 
-- All event, flyer, and blog/news data is fetched from the backend API documented in `AUTHORITATIVE_BACKEND_DOC.md`.
-- No direct data storage in the frontend; all dynamic content is API-driven.
+- Static site, served from Cloudflare Pages/Workers
+- All config in `wrangler.jsonc`
 
 ---
 
-## State Switching
-
-- Controlled by `jss/script.js` and the `data-state` attribute on `<body>`
-- All UI, theming, and slideshows update based on state
-- API calls use the current state (venue) as a parameter
-
----
-
-## Blog/News
-
-- Blog/news posts are rendered from API data
-- Images are referenced by URL (never base64)
-- Admin dashboard uses Quill with custom image upload
-
----
-
-## Modern Practices
-
-- No legacy config files (no TOML, no old build scripts)
-- All config in `wrangler.jsonc` (for backend)
-- Use only modern, supported browser APIs and CSS
-
----
-
-## Quick Start
-
-1. Deploy static files to Cloudflare Pages or similar
-2. Ensure backend API is deployed and accessible
-3. All dynamic content will load automatically from API
-
----
-
-## Contact
-
-For questions, see this file or the backend doc, or contact the project maintainer.
-
----
-
-*This is the only authoritative frontend documentation. All other frontend docs can be archived.*
+_Last updated: 2025-06-17_

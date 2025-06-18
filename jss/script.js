@@ -268,8 +268,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (slideImage) {
       slideImage.src = flyer.imageUrl || '';
       slideImage.alt = flyer.title || 'Flyer';
-      
-      // Add click event listener for popup
       slideImage.style.cursor = 'pointer';
       slideImage.onclick = () => createEventPopup(flyer);
     }
